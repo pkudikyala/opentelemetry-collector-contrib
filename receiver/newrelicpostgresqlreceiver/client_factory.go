@@ -12,7 +12,7 @@ import (
 	"go.uber.org/multierr"
 )
 
-const connectionPoolGateID = "receiver.postgresql.connectionPool"
+const connectionPoolGateID = "receiver.newrelicpostgresql.connectionPool"
 
 var connectionPoolGate = featuregate.GlobalRegistry().MustRegister(
 	connectionPoolGateID,

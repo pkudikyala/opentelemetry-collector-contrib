@@ -26,7 +26,7 @@ import (
 	"github.com/open-telemetry/opentelemetry-collector-contrib/internal/sqlquery"
 )
 
-const lagMetricsInSecondsFeatureGateID = "postgresqlreceiver.preciselagmetrics"
+const lagMetricsInSecondsFeatureGateID = "newrelicpostgresqlreceiver.preciselagmetrics"
 
 var preciseLagMetricsFg = featuregate.GlobalRegistry().MustRegister(
 	lagMetricsInSecondsFeatureGateID,

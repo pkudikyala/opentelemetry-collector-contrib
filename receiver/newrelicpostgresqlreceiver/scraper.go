@@ -5,6 +5,7 @@ package newrelicpostgresqlreceiver // import "github.com/open-telemetry/opentele
 
 import (
 	"context"
+	"fmt"
 	"sync"
 	"time"
 
@@ -41,6 +42,26 @@ func (e *errsMux) add(err error) {
 	e.Lock()
 	defer e.Unlock()
 	e.errs = append(e.errs, err)
+}
+
+func (e *errsMux) combine() error {
+	e.RLock()
+	defer e.RUnlock()
+	if len(e.errs) == 0 {
+		return nil
+	}
+	if len(e.errs) == 1 {
+		return e.errs[0]
+	}
+	// Combine multiple errors into a single error message
+	var msg string
+	for i, err := range e.errs {
+		if i > 0 {
+			msg += "; "
+		}
+		msg += err.Error()
+	}
+	return fmt.Errorf("multiple errors: %s", msg)
 }
 
 func newPostgreSQLScraper(
@@ -156,7 +177,7 @@ func (p *postgreSQLScraper) scrape(ctx context.Context) (pmetric.Metrics, error)
 		}
 	}
 
-	return p.mb.Emit(), nil
+	return p.mb.Emit(), errs.combine()
 }
 
 func (p *postgreSQLScraper) collectBasicMetrics(ctx context.Context, database string, now pcommon.Timestamp, errs *errsMux) {
