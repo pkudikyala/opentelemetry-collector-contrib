@@ -1,0 +1,304 @@
+type: newrelicpostgresql
+
+status:
+  class: receiver
+  stability:
+    beta: [metrics]
+    development: [logs]
+  distributions: [contrib]
+  codeowners:
+    active: [antonblock, ishleenk17]
+    seeking_new: true
+    emeritus: [djaglowski]
+
+resource_attributes:
+  postgresql.database.name:
+    description: The name of the database.
+    enabled: true
+    type: string
+  postgresql.schema.name:
+    description: The schema name.
+    enabled: true
+    type: string
+  postgresql.table.name:
+    description: The table name.
+    enabled: true
+    type: string
+  postgresql.index.name:
+    description: The name of the index on a table.
+    enabled: true
+    type: string
+
+attributes:
+  postgresql.database.name:
+    description: The name of the database.
+    type: string
+  postgresql.schema.name:
+    description: The schema name.
+    type: string
+  postgresql.table.name:
+    description: The table name.
+    type: string
+  postgresql.index.name:
+    description: The name of the index on a table.
+    type: string
+  postgresql.query.id:
+    description: The unique identifier for the query.
+    type: string
+  postgresql.query.text:
+    description: The SQL query text.
+    type: string
+  postgresql.statement.type:
+    description: The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.).
+    type: string
+  postgresql.wait.event.name:
+    description: The name of the wait event.
+    type: string
+  postgresql.wait.category:
+    description: The category of the wait event.
+    type: string
+  postgresql.node.type:
+    description: The node type in query execution plan.
+    type: string
+  source:
+    description: The block read source type.
+    type: string
+    enum:
+      - heap_read
+      - heap_hit
+      - idx_read
+      - idx_hit
+      - toast_read
+      - toast_hit
+      - tidx_read
+      - tidx_hit
+  operation:
+    description: The database operation.
+    type: string
+    enum: [ins, upd, del, hot_upd]
+  state:
+    description: The tuple (row) state.
+    type: string
+    enum: [dead, live]
+
+metrics:
+  postgresql.blocks_read:
+    enabled: true
+    description: The number of blocks read.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.table.name, source]
+  postgresql.blocks_hit:
+    enabled: true
+    description: The number of blocks found in the buffer cache.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.table.name, source]
+  postgresql.operations:
+    enabled: true
+    description: The number of database operations.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.table.name, operation]
+  postgresql.rows:
+    enabled: true
+    description: The number of rows.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.table.name, state]
+  postgresql.commits:
+    enabled: true
+    description: The number of commits.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name]
+  postgresql.rollbacks:
+    enabled: true
+    description: The number of rollbacks.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name]
+  postgresql.connection.max:
+    enabled: true
+    description: Maximum number of client connections allowed.
+    unit: "1"
+    gauge:
+      value_type: int
+  postgresql.connection.count:
+    enabled: true
+    description: Number of user connections.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: false
+    attributes: [postgresql.database.name]
+  postgresql.database.count:
+    enabled: true
+    description: Number of user databases.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: false
+  postgresql.database.locks:
+    enabled: true
+    description: The number of database locks.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: false
+    attributes: [postgresql.database.name]
+  postgresql.index.scans:
+    enabled: true
+    description: The number of index scans on a table.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name, postgresql.index.name]
+  postgresql.index.size:
+    enabled: true
+    description: The size of the index on disk.
+    unit: "By"
+    sum:
+      value_type: int
+      monotonic: false
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name, postgresql.index.name]
+  postgresql.table.scans:
+    enabled: true
+    description: The number of sequential scans on a table.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name]
+  postgresql.table.size:
+    enabled: true
+    description: Disk space used by a table.
+    unit: "By"
+    sum:
+      value_type: int
+      monotonic: false
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name]
+  postgresql.table.vacuum.count:
+    enabled: true
+    description: Number of times a table has been manually vacuumed.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name]
+  postgresql.wal.age:
+    enabled: true
+    description: Age of the oldest WAL file.
+    unit: "s"
+    gauge:
+      value_type: int
+  postgresql.wal.lag:
+    enabled: true
+    description: Time between flushing recent WAL locally and receiving notification that the standby server has completed an operation with it.
+    unit: "s"
+    gauge:
+      value_type: double
+  # New Relic specific metrics for query performance monitoring
+  postgresql.query.execution.count:
+    enabled: true
+    description: Number of times the query was executed.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: true
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+  postgresql.query.avg_elapsed_time:
+    enabled: true
+    description: Average execution time for the query in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+  postgresql.query.avg_disk_reads:
+    enabled: true
+    description: Average number of disk reads per query execution.
+    unit: "1"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+  postgresql.query.avg_disk_writes:
+    enabled: true
+    description: Average number of disk writes per query execution.
+    unit: "1"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+  postgresql.query.cpu_time:
+    enabled: true
+    description: CPU time consumed by the query in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text]
+  postgresql.wait.event.total_time:
+    enabled: true
+    description: Total wait time for the wait event in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.wait.event.name, postgresql.wait.category]
+  postgresql.blocking.session.pid:
+    enabled: true
+    description: Process ID of the blocking session.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.text]
+  postgresql.blocked.session.pid:
+    enabled: true
+    description: Process ID of the blocked session.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.text]
+  postgresql.execution_plan.parallel_aware:
+    enabled: true
+    description: Whether the execution plan node is parallel aware.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.async_capable:
+    enabled: true
+    description: Whether the execution plan node is async capable.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.actual_rows:
+    enabled: true
+    description: Actual number of rows processed by the execution plan node.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.actual_loops:
+    enabled: true
+    description: Number of times the execution plan node was executed.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.actual_total_time:
+    enabled: true
+    description: Total time spent in the execution plan node in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
