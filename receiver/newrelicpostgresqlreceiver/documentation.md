@@ -80,7 +80,7 @@ The number of commits.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -218,7 +218,7 @@ The number of index scans on a table.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -252,7 +252,7 @@ The number of database operations.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -335,7 +335,7 @@ Number of times the query was executed.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -352,7 +352,7 @@ The number of rollbacks.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -366,7 +366,7 @@ The number of rows.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -382,7 +382,7 @@ The number of sequential scans on a table.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -414,7 +414,7 @@ Number of times a table has been manually vacuumed.
 
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
-| 1 | Sum | Int | Unspecified | true |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 

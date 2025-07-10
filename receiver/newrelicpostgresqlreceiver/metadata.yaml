@@ -60,6 +60,18 @@ attributes:
   postgresql.node.type:
     description: The node type in query execution plan.
     type: string
+  postgresql.blocked.query.text:
+    description: The SQL query text of the blocked session.
+    type: string
+  postgresql.blocking.query.text:
+    description: The SQL query text of the blocking session.
+    type: string
+  postgresql.wait.event.type:
+    description: The type of wait event.
+    type: string
+  postgresql.wait.event:
+    description: The specific wait event.
+    type: string
   source:
     description: The block read source type.
     type: string
@@ -103,6 +115,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.table.name, operation]
   postgresql.rows:
     enabled: true
@@ -111,6 +124,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.table.name, state]
   postgresql.commits:
     enabled: true
@@ -119,6 +133,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name]
   postgresql.rollbacks:
     enabled: true
@@ -127,6 +142,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name]
   postgresql.connection.max:
     enabled: true
@@ -164,6 +180,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name, postgresql.index.name]
   postgresql.index.size:
     enabled: true
@@ -180,6 +197,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name]
   postgresql.table.size:
     enabled: true
@@ -196,6 +214,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.schema.name, postgresql.table.name]
   postgresql.wal.age:
     enabled: true
@@ -217,6 +236,7 @@ metrics:
     sum:
       value_type: int
       monotonic: true
+      aggregation_temporality: cumulative
     attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
   postgresql.query.avg_elapsed_time:
     enabled: true
@@ -267,6 +287,27 @@ metrics:
     gauge:
       value_type: int
     attributes: [postgresql.database.name, postgresql.query.text]
+  postgresql.blocking.session.duration:
+    enabled: true
+    description: Duration for which the session has been blocking.
+    unit: "s"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.blocked.query.text, postgresql.blocking.query.text]
+  postgresql.blocking.session.wait_event_type:
+    enabled: true
+    description: Wait event type for the blocking session.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.blocked.query.text, postgresql.blocking.query.text, postgresql.wait.event.type]
+  postgresql.blocking.session.wait_event:
+    enabled: true
+    description: Wait event for the blocking session.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.blocked.query.text, postgresql.blocking.query.text, postgresql.wait.event]
   postgresql.execution_plan.parallel_aware:
     enabled: true
     description: Whether the execution plan node is parallel aware.

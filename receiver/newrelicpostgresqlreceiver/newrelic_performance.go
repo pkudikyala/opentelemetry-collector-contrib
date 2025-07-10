@@ -179,18 +179,22 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 			avg_elapsed_time_ms DESC
 		LIMIT %d`,
 		nrqpc.formatDatabaseList(databases),
-		5, // minimum calls
+		1, // minimum calls (reduced from 5)
 		nrqpc.config.SlowQueryThresholdMs,
 		nrqpc.config.MaxQueriesPerCollection,
 	)
 
 	rows, err := nrqpc.client.Query(ctx, query)
 	if err != nil {
+		nrqpc.logger.Error("Failed to execute slow queries query", zap.Error(err), zap.String("query", query))
 		return fmt.Errorf("failed to execute slow queries query: %w", err)
 	}
 	defer rows.Close()
 
+	nrqpc.logger.Debug("Executing slow queries collection", zap.String("query", query))
+
 	now := pcommon.NewTimestampFromTime(time.Now())
+	slowQueryCount := 0
 
 	for rows.Next() {
 		var slowQuery SlowQueryInfo
@@ -213,6 +217,14 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 			continue
 		}
 
+		slowQueryCount++
+		nrqpc.logger.Debug("Found slow query", 
+			zap.String("query_id", slowQuery.QueryID),
+			zap.String("database_name", slowQuery.DatabaseName),
+			zap.Int64("execution_count", slowQuery.ExecutionCount),
+			zap.Float64("avg_elapsed_time_ms", slowQuery.AvgElapsedTimeMs),
+		)
+
 		// Cache the slow query for later use
 		nrqpc.slowQueryCache[slowQuery.QueryID] = &slowQuery
 
@@ -225,6 +237,8 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 		// Generate log entry for slow query
 		nrqpc.generateSlowQueryLog(slowQuery)
 	}
+
+	nrqpc.logger.Debug("Slow query collection completed", zap.Int("slow_query_count", slowQueryCount))
 
 	return nil
 }
