@@ -19,29 +19,29 @@ import (
 
 // NewRelicQueryPerformanceCollector handles collection of New Relic specific query performance metrics
 type NewRelicQueryPerformanceCollector struct {
-	logger           *zap.Logger
-	mb               *metadata.MetricsBuilder
-	lb               *metadata.LogsBuilder
-	config           *NewRelicQueryPerformanceConfig
-	client           client
-	slowQueryCache   map[string]*SlowQueryInfo
-	executionPlans   map[string]*ExecutionPlan
-	lastCollectedAt  time.Time
+	logger          *zap.Logger
+	mb              *metadata.MetricsBuilder
+	lb              *metadata.LogsBuilder
+	config          *NewRelicQueryPerformanceConfig
+	client          client
+	slowQueryCache  map[string]*SlowQueryInfo
+	executionPlans  map[string]*ExecutionPlan
+	lastCollectedAt time.Time
 }
 
 // SlowQueryInfo represents information about a slow query
 type SlowQueryInfo struct {
-	QueryID           string    `json:"query_id"`
-	QueryText         string    `json:"query_text"`
-	DatabaseName      string    `json:"database_name"`
-	SchemaName        string    `json:"schema_name"`
-	ExecutionCount    int64     `json:"execution_count"`
-	AvgElapsedTimeMs  float64   `json:"avg_elapsed_time_ms"`
-	AvgDiskReads      float64   `json:"avg_disk_reads"`
-	AvgDiskWrites     float64   `json:"avg_disk_writes"`
-	StatementType     string    `json:"statement_type"`
-	CollectionTime    time.Time `json:"collection_time"`
-	IndividualQuery   string    `json:"individual_query,omitempty"`
+	QueryID          string    `json:"query_id"`
+	QueryText        string    `json:"query_text"`
+	DatabaseName     string    `json:"database_name"`
+	SchemaName       string    `json:"schema_name"`
+	ExecutionCount   int64     `json:"execution_count"`
+	AvgElapsedTimeMs float64   `json:"avg_elapsed_time_ms"`
+	AvgDiskReads     float64   `json:"avg_disk_reads"`
+	AvgDiskWrites    float64   `json:"avg_disk_writes"`
+	StatementType    string    `json:"statement_type"`
+	CollectionTime   time.Time `json:"collection_time"`
+	IndividualQuery  string    `json:"individual_query,omitempty"`
 }
 
 // WaitEventInfo represents wait event metrics
@@ -77,25 +77,25 @@ type ExecutionPlan struct {
 
 // IndividualQueryInfo represents individual query metrics
 type IndividualQueryInfo struct {
-	QueryID         string  `json:"query_id"`
-	QueryText       string  `json:"query_text"`
-	DatabaseName    string  `json:"database_name"`
-	PlanID          string  `json:"plan_id"`
-	CPUTimeMs       float64 `json:"cpu_time_ms"`
-	ExecTimeMs      float64 `json:"exec_time_ms"`
-	RealQueryText   string  `json:"real_query_text"`
+	QueryID       string  `json:"query_id"`
+	QueryText     string  `json:"query_text"`
+	DatabaseName  string  `json:"database_name"`
+	PlanID        string  `json:"plan_id"`
+	CPUTimeMs     float64 `json:"cpu_time_ms"`
+	ExecTimeMs    float64 `json:"exec_time_ms"`
+	RealQueryText string  `json:"real_query_text"`
 }
 
 // NewRelicQueryPerformanceCollector creates a new instance of the collector
 func NewNewRelicQueryPerformanceCollector(logger *zap.Logger, mb *metadata.MetricsBuilder, lb *metadata.LogsBuilder, config *NewRelicQueryPerformanceConfig, client client) *NewRelicQueryPerformanceCollector {
 	return &NewRelicQueryPerformanceCollector{
-		logger:         logger,
-		mb:             mb,
-		lb:             lb,
-		config:         config,
-		client:         client,
-		slowQueryCache: make(map[string]*SlowQueryInfo),
-		executionPlans: make(map[string]*ExecutionPlan),
+		logger:          logger,
+		mb:              mb,
+		lb:              lb,
+		config:          config,
+		client:          client,
+		slowQueryCache:  make(map[string]*SlowQueryInfo),
+		executionPlans:  make(map[string]*ExecutionPlan),
 		lastCollectedAt: time.Now(),
 	}
 }
@@ -208,6 +208,19 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 			&slowQuery.StatementType,
 			&collectionTimestamp,
 		)
+		nrqpc.logger.Info("Slow query details",
+			zap.String("query_id", slowQuery.QueryID),
+			zap.String("query_text", slowQuery.QueryText),
+			zap.String("database_name", slowQuery.DatabaseName),
+			zap.String("schema_name", slowQuery.SchemaName),
+			zap.Int64("execution_count", slowQuery.ExecutionCount),
+			zap.Float64("avg_elapsed_time_ms", slowQuery.AvgElapsedTimeMs),
+			zap.Float64("avg_disk_reads", slowQuery.AvgDiskReads),
+			zap.Float64("avg_disk_writes", slowQuery.AvgDiskWrites),
+			zap.String("statement_type", slowQuery.StatementType),
+			zap.Time("collection_time", slowQuery.CollectionTime),
+		)
+
 		if err != nil {
 			nrqpc.logger.Error("Failed to scan slow query row", zap.Error(err))
 			continue
@@ -439,7 +452,7 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectExecutionPlans(ctx contex
 
 		// Get execution plan using EXPLAIN
 		planQuery := fmt.Sprintf("EXPLAIN (FORMAT JSON) %s", slowQuery.QueryText)
-		
+
 		rows, err := nrqpc.client.Query(ctx, planQuery)
 		if err != nil {
 			nrqpc.logger.Debug("Failed to get execution plan", zap.String("query_id", queryID), zap.Error(err))
@@ -529,10 +542,10 @@ func (nrqpc *NewRelicQueryPerformanceCollector) generateSlowQueryLog(slowQuery S
 	logRecord.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 	logRecord.SetSeverityNumber(plog.SeverityNumberWarn)
 	logRecord.SetSeverityText("WARN")
-	
+
 	body := logRecord.Body()
 	body.SetStr(fmt.Sprintf("Slow query detected: %s", slowQuery.QueryText))
-	
+
 	attrs := logRecord.Attributes()
 	attrs.PutStr("postgresql.query.id", slowQuery.QueryID)
 	attrs.PutStr("postgresql.query.text", slowQuery.QueryText)
@@ -543,7 +556,7 @@ func (nrqpc *NewRelicQueryPerformanceCollector) generateSlowQueryLog(slowQuery S
 	attrs.PutDouble("postgresql.query.avg_elapsed_time", slowQuery.AvgElapsedTimeMs)
 	attrs.PutDouble("postgresql.query.avg_disk_reads", slowQuery.AvgDiskReads)
 	attrs.PutDouble("postgresql.query.avg_disk_writes", slowQuery.AvgDiskWrites)
-	
+
 	// Append the log record to the logs builder
 	nrqpc.lb.AppendLogRecord(logRecord)
 }
