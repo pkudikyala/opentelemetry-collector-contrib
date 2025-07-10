@@ -33,7 +33,31 @@ all_set:
       enabled: true
     postgresql.execution_plan.async_capable:
       enabled: true
+    postgresql.execution_plan.cost_actual:
+      enabled: true
+    postgresql.execution_plan.cost_estimate:
+      enabled: true
+    postgresql.execution_plan.io_read_time:
+      enabled: true
+    postgresql.execution_plan.io_write_time:
+      enabled: true
     postgresql.execution_plan.parallel_aware:
+      enabled: true
+    postgresql.execution_plan.plan_rows:
+      enabled: true
+    postgresql.execution_plan.plan_width:
+      enabled: true
+    postgresql.execution_plan.shared_hit_blocks:
+      enabled: true
+    postgresql.execution_plan.shared_read_blocks:
+      enabled: true
+    postgresql.execution_plan.shared_written_blocks:
+      enabled: true
+    postgresql.execution_plan.startup_time:
+      enabled: true
+    postgresql.execution_plan.temp_read_blocks:
+      enabled: true
+    postgresql.execution_plan.temp_written_blocks:
       enabled: true
     postgresql.index.scans:
       enabled: true
@@ -110,7 +134,31 @@ none_set:
       enabled: false
     postgresql.execution_plan.async_capable:
       enabled: false
+    postgresql.execution_plan.cost_actual:
+      enabled: false
+    postgresql.execution_plan.cost_estimate:
+      enabled: false
+    postgresql.execution_plan.io_read_time:
+      enabled: false
+    postgresql.execution_plan.io_write_time:
+      enabled: false
     postgresql.execution_plan.parallel_aware:
+      enabled: false
+    postgresql.execution_plan.plan_rows:
+      enabled: false
+    postgresql.execution_plan.plan_width:
+      enabled: false
+    postgresql.execution_plan.shared_hit_blocks:
+      enabled: false
+    postgresql.execution_plan.shared_read_blocks:
+      enabled: false
+    postgresql.execution_plan.shared_written_blocks:
+      enabled: false
+    postgresql.execution_plan.startup_time:
+      enabled: false
+    postgresql.execution_plan.temp_read_blocks:
+      enabled: false
+    postgresql.execution_plan.temp_written_blocks:
       enabled: false
     postgresql.index.scans:
       enabled: false

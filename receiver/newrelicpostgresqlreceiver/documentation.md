@@ -27,6 +27,22 @@ Process ID of the blocked session.
 | postgresql.database.name | The name of the database. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 
+### postgresql.blocking.session.duration
+
+Duration for which the session has been blocking.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| s | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.blocked.query.text | The SQL query text of the blocked session. | Any Str | false |
+| postgresql.blocking.query.text | The SQL query text of the blocking session. | Any Str | false |
+
 ### postgresql.blocking.session.pid
 
 Process ID of the blocking session.
@@ -41,6 +57,40 @@ Process ID of the blocking session.
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
+
+### postgresql.blocking.session.wait_event
+
+Wait event for the blocking session.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.blocked.query.text | The SQL query text of the blocked session. | Any Str | false |
+| postgresql.blocking.query.text | The SQL query text of the blocking session. | Any Str | false |
+| postgresql.wait.event | The specific wait event. | Any Str | false |
+
+### postgresql.blocking.session.wait_event_type
+
+Wait event type for the blocking session.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.blocked.query.text | The SQL query text of the blocked session. | Any Str | false |
+| postgresql.blocking.query.text | The SQL query text of the blocking session. | Any Str | false |
+| postgresql.wait.event.type | The type of wait event. | Any Str | false |
 
 ### postgresql.blocks_hit
 
@@ -196,9 +246,201 @@ Whether the execution plan node is async capable.
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.node.type | The node type in query execution plan. | Any Str | false |
 
+### postgresql.execution_plan.cost_actual
+
+Actual cost of the execution plan node.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.cost_estimate
+
+Estimated cost of the execution plan node.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.io_read_time
+
+Time spent reading blocks from disk in milliseconds.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| ms | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.io_write_time
+
+Time spent writing blocks to disk in milliseconds.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| ms | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
 ### postgresql.execution_plan.parallel_aware
 
 Whether the execution plan node is parallel aware.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.plan_rows
+
+Estimated number of rows to be processed by the execution plan node.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.plan_width
+
+Estimated width of rows to be processed by the execution plan node.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| By | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.shared_hit_blocks
+
+Number of shared blocks hit from cache.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.shared_read_blocks
+
+Number of shared blocks read from disk.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.shared_written_blocks
+
+Number of shared blocks written to disk.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.startup_time
+
+Time taken to start the execution plan node in milliseconds.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| ms | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.temp_read_blocks
+
+Number of temporary blocks read from disk.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| 1 | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.query.id | The unique identifier for the query. | Any Str | false |
+| postgresql.node.type | The node type in query execution plan. | Any Str | false |
+
+### postgresql.execution_plan.temp_written_blocks
+
+Number of temporary blocks written to disk.
 
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |

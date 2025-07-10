@@ -74,7 +74,19 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
+			mb.RecordPostgresqlBlockingSessionDurationDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.blocked.query.text-val", "postgresql.blocking.query.text-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
 			mb.RecordPostgresqlBlockingSessionPidDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.text-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlBlockingSessionWaitEventDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.blocked.query.text-val", "postgresql.blocking.query.text-val", "postgresql.wait.event-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlBlockingSessionWaitEventTypeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.blocked.query.text-val", "postgresql.blocking.query.text-val", "postgresql.wait.event.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -122,7 +134,55 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanCostActualDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanCostEstimateDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanIoReadTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanIoWriteTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
 			mb.RecordPostgresqlExecutionPlanParallelAwareDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanPlanRowsDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanPlanWidthDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanSharedHitBlocksDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanSharedReadBlocksDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanSharedWrittenBlocksDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanStartupTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanTempReadBlocksDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
+
+			defaultMetricsCount++
+			allMetricsCount++
+			mb.RecordPostgresqlExecutionPlanTempWrittenBlocksDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.node.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -233,6 +293,27 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok = dp.Attributes().Get("postgresql.query.text")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.text-val", attrVal.Str())
+				case "postgresql.blocking.session.duration":
+					assert.False(t, validatedMetrics["postgresql.blocking.session.duration"], "Found a duplicate in the metrics slice: postgresql.blocking.session.duration")
+					validatedMetrics["postgresql.blocking.session.duration"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Duration for which the session has been blocking.", ms.At(i).Description())
+					assert.Equal(t, "s", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocked.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocked.query.text-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocking.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocking.query.text-val", attrVal.Str())
 				case "postgresql.blocking.session.pid":
 					assert.False(t, validatedMetrics["postgresql.blocking.session.pid"], "Found a duplicate in the metrics slice: postgresql.blocking.session.pid")
 					validatedMetrics["postgresql.blocking.session.pid"] = true
@@ -251,6 +332,54 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok = dp.Attributes().Get("postgresql.query.text")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.text-val", attrVal.Str())
+				case "postgresql.blocking.session.wait_event":
+					assert.False(t, validatedMetrics["postgresql.blocking.session.wait_event"], "Found a duplicate in the metrics slice: postgresql.blocking.session.wait_event")
+					validatedMetrics["postgresql.blocking.session.wait_event"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Wait event for the blocking session.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocked.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocked.query.text-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocking.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocking.query.text-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.wait.event")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.wait.event-val", attrVal.Str())
+				case "postgresql.blocking.session.wait_event_type":
+					assert.False(t, validatedMetrics["postgresql.blocking.session.wait_event_type"], "Found a duplicate in the metrics slice: postgresql.blocking.session.wait_event_type")
+					validatedMetrics["postgresql.blocking.session.wait_event_type"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Wait event type for the blocking session.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocked.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocked.query.text-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.blocking.query.text")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.blocking.query.text-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.wait.event.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.wait.event.type-val", attrVal.Str())
 				case "postgresql.blocks_hit":
 					assert.False(t, validatedMetrics["postgresql.blocks_hit"], "Found a duplicate in the metrics slice: postgresql.blocks_hit")
 					validatedMetrics["postgresql.blocks_hit"] = true
@@ -454,12 +583,264 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.cost_actual":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.cost_actual"], "Found a duplicate in the metrics slice: postgresql.execution_plan.cost_actual")
+					validatedMetrics["postgresql.execution_plan.cost_actual"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Actual cost of the execution plan node.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.cost_estimate":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.cost_estimate"], "Found a duplicate in the metrics slice: postgresql.execution_plan.cost_estimate")
+					validatedMetrics["postgresql.execution_plan.cost_estimate"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Estimated cost of the execution plan node.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.io_read_time":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.io_read_time"], "Found a duplicate in the metrics slice: postgresql.execution_plan.io_read_time")
+					validatedMetrics["postgresql.execution_plan.io_read_time"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Time spent reading blocks from disk in milliseconds.", ms.At(i).Description())
+					assert.Equal(t, "ms", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.io_write_time":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.io_write_time"], "Found a duplicate in the metrics slice: postgresql.execution_plan.io_write_time")
+					validatedMetrics["postgresql.execution_plan.io_write_time"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Time spent writing blocks to disk in milliseconds.", ms.At(i).Description())
+					assert.Equal(t, "ms", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
 				case "postgresql.execution_plan.parallel_aware":
 					assert.False(t, validatedMetrics["postgresql.execution_plan.parallel_aware"], "Found a duplicate in the metrics slice: postgresql.execution_plan.parallel_aware")
 					validatedMetrics["postgresql.execution_plan.parallel_aware"] = true
 					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
 					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
 					assert.Equal(t, "Whether the execution plan node is parallel aware.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.plan_rows":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.plan_rows"], "Found a duplicate in the metrics slice: postgresql.execution_plan.plan_rows")
+					validatedMetrics["postgresql.execution_plan.plan_rows"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Estimated number of rows to be processed by the execution plan node.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.plan_width":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.plan_width"], "Found a duplicate in the metrics slice: postgresql.execution_plan.plan_width")
+					validatedMetrics["postgresql.execution_plan.plan_width"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Estimated width of rows to be processed by the execution plan node.", ms.At(i).Description())
+					assert.Equal(t, "By", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.shared_hit_blocks":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.shared_hit_blocks"], "Found a duplicate in the metrics slice: postgresql.execution_plan.shared_hit_blocks")
+					validatedMetrics["postgresql.execution_plan.shared_hit_blocks"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Number of shared blocks hit from cache.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.shared_read_blocks":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.shared_read_blocks"], "Found a duplicate in the metrics slice: postgresql.execution_plan.shared_read_blocks")
+					validatedMetrics["postgresql.execution_plan.shared_read_blocks"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Number of shared blocks read from disk.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.shared_written_blocks":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.shared_written_blocks"], "Found a duplicate in the metrics slice: postgresql.execution_plan.shared_written_blocks")
+					validatedMetrics["postgresql.execution_plan.shared_written_blocks"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Number of shared blocks written to disk.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.startup_time":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.startup_time"], "Found a duplicate in the metrics slice: postgresql.execution_plan.startup_time")
+					validatedMetrics["postgresql.execution_plan.startup_time"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Time taken to start the execution plan node in milliseconds.", ms.At(i).Description())
+					assert.Equal(t, "ms", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeDouble, dp.ValueType())
+					assert.InDelta(t, float64(1), dp.DoubleValue(), 0.01)
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.temp_read_blocks":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.temp_read_blocks"], "Found a duplicate in the metrics slice: postgresql.execution_plan.temp_read_blocks")
+					validatedMetrics["postgresql.execution_plan.temp_read_blocks"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Number of temporary blocks read from disk.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					dp := ms.At(i).Gauge().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
+					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.node.type")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.node.type-val", attrVal.Str())
+				case "postgresql.execution_plan.temp_written_blocks":
+					assert.False(t, validatedMetrics["postgresql.execution_plan.temp_written_blocks"], "Found a duplicate in the metrics slice: postgresql.execution_plan.temp_written_blocks")
+					validatedMetrics["postgresql.execution_plan.temp_written_blocks"] = true
+					assert.Equal(t, pmetric.MetricTypeGauge, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Gauge().DataPoints().Len())
+					assert.Equal(t, "Number of temporary blocks written to disk.", ms.At(i).Description())
 					assert.Equal(t, "1", ms.At(i).Unit())
 					dp := ms.At(i).Gauge().DataPoints().At(0)
 					assert.Equal(t, start, dp.StartTimestamp())

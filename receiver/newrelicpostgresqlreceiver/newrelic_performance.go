@@ -377,6 +377,11 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectBlockingSessions(ctx cont
 		// Record blocking session metrics
 		nrqpc.mb.RecordPostgresqlBlockingSessionPidDataPoint(now, blockingSession.BlockingPid, blockingSession.DatabaseName, blockingSession.BlockingQuery)
 		nrqpc.mb.RecordPostgresqlBlockedSessionPidDataPoint(now, blockingSession.BlockedPid, blockingSession.DatabaseName, blockingSession.BlockedQuery)
+		
+		// Record new blocking session metrics
+		nrqpc.mb.RecordPostgresqlBlockingSessionDurationDataPoint(now, blockingDurationFloat, blockingSession.DatabaseName, blockingSession.BlockedQuery, blockingSession.BlockingQuery)
+		nrqpc.mb.RecordPostgresqlBlockingSessionWaitEventTypeDataPoint(now, 1, blockingSession.DatabaseName, blockingSession.BlockedQuery, blockingSession.BlockingQuery, blockingSession.WaitEventType)
+		nrqpc.mb.RecordPostgresqlBlockingSessionWaitEventDataPoint(now, 1, blockingSession.DatabaseName, blockingSession.BlockedQuery, blockingSession.BlockingQuery, blockingSession.WaitEvent)
 	}
 
 	return nil
@@ -443,20 +448,50 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectIndividualQueries(ctx con
 	return nil
 }
 
-// collectExecutionPlans collects execution plans for queries
+// collectExecutionPlans collects detailed execution plans for slow queries
 func (nrqpc *NewRelicQueryPerformanceCollector) collectExecutionPlans(ctx context.Context, databases []string) error {
-	// For each slow query in cache, try to get execution plan
+	now := pcommon.NewTimestampFromTime(time.Now())
+	
+	// For each slow query in cache, get detailed execution plan
 	for queryID, slowQuery := range nrqpc.slowQueryCache {
 		if _, exists := nrqpc.executionPlans[queryID]; exists {
 			continue // Already have plan for this query
 		}
 
-		// Get execution plan using EXPLAIN
-		planQuery := fmt.Sprintf("EXPLAIN (FORMAT JSON) %s", slowQuery.QueryText)
+		// Skip queries that can't be explained
+		if nrqpc.shouldSkipExecutionPlan(slowQuery.QueryText) {
+			nrqpc.logger.Debug("Skipping execution plan for query", 
+				zap.String("query_id", queryID),
+				zap.String("reason", "query type not suitable for EXPLAIN"),
+			)
+			continue
+		}
+
+		// Clean the query text for EXPLAIN (remove parameters)
+		cleanedQuery := nrqpc.cleanQueryForExplain(slowQuery.QueryText)
 		
+		// Get execution plan with detailed information but without actual execution
+		planQuery := fmt.Sprintf(`
+			EXPLAIN (
+				FORMAT JSON, 
+				ANALYZE false, 
+				VERBOSE true, 
+				COSTS true, 
+				SETTINGS true, 
+				BUFFERS false
+			) %s`, cleanedQuery)
+		
+		nrqpc.logger.Debug("Getting execution plan for slow query", 
+			zap.String("query_id", queryID),
+			zap.String("database", slowQuery.DatabaseName),
+		)
+
 		rows, err := nrqpc.client.Query(ctx, planQuery)
 		if err != nil {
-			nrqpc.logger.Debug("Failed to get execution plan", zap.String("query_id", queryID), zap.Error(err))
+			nrqpc.logger.Debug("Failed to get execution plan", 
+				zap.String("query_id", queryID), 
+				zap.String("database", slowQuery.DatabaseName),
+				zap.Error(err))
 			continue
 		}
 
@@ -487,65 +522,158 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectExecutionPlans(ctx contex
 			}
 
 			nrqpc.executionPlans[queryID] = executionPlan
-			nrqpc.recordExecutionPlanMetrics(executionPlan)
+			nrqpc.recordDetailedExecutionPlanMetrics(executionPlan, now)
+			
+			nrqpc.logger.Debug("Successfully recorded execution plan metrics", 
+				zap.String("query_id", queryID),
+				zap.String("plan_id", executionPlan.PlanID),
+			)
 		}
 	}
 
 	return nil
 }
 
-// recordExecutionPlanMetrics records execution plan related metrics
-func (nrqpc *NewRelicQueryPerformanceCollector) recordExecutionPlanMetrics(plan *ExecutionPlan) {
-	now := pcommon.NewTimestampFromTime(time.Now())
+// recordDetailedExecutionPlanMetrics records comprehensive execution plan metrics
+func (nrqpc *NewRelicQueryPerformanceCollector) recordDetailedExecutionPlanMetrics(plan *ExecutionPlan, now pcommon.Timestamp) {
+	// Recursively traverse the execution plan tree to extract all nodes
+	nrqpc.recordPlanNodeMetrics(plan.Plan, plan.DatabaseName, plan.QueryID, now)
+}
 
-	// Extract plan information and record metrics
-	if planData, ok := plan.Plan["Plan"].(map[string]interface{}); ok {
-		if nodeType, ok := planData["Node Type"].(string); ok {
-			// Record parallel aware
-			if parallelAware, ok := planData["Parallel Aware"].(bool); ok {
-				parallelAwareInt := int64(0)
-				if parallelAware {
-					parallelAwareInt = 1
-				}
-				nrqpc.mb.RecordPostgresqlExecutionPlanParallelAwareDataPoint(now, parallelAwareInt, plan.DatabaseName, plan.QueryID, nodeType)
-			}
+// recordPlanNodeMetrics recursively processes execution plan nodes
+func (nrqpc *NewRelicQueryPerformanceCollector) recordPlanNodeMetrics(node map[string]interface{}, databaseName, queryID string, now pcommon.Timestamp) {
+	planData, ok := node["Plan"].(map[string]interface{})
+	if !ok {
+		// If no "Plan" key, the node itself might be the plan data
+		planData = node
+	}
 
-			// Record async capable
-			if asyncCapable, ok := planData["Async Capable"].(bool); ok {
-				asyncCapableInt := int64(0)
-				if asyncCapable {
-					asyncCapableInt = 1
-				}
-				nrqpc.mb.RecordPostgresqlExecutionPlanAsyncCapableDataPoint(now, asyncCapableInt, plan.DatabaseName, plan.QueryID, nodeType)
-			}
+	nodeType, ok := planData["Node Type"].(string)
+	if !ok {
+		return
+	}
 
-			// Record actual rows
-			if actualRows, ok := planData["Actual Rows"].(float64); ok {
-				nrqpc.mb.RecordPostgresqlExecutionPlanActualRowsDataPoint(now, int64(actualRows), plan.DatabaseName, plan.QueryID, nodeType)
-			}
+	nrqpc.logger.Debug("Recording execution plan metrics", 
+		zap.String("database", databaseName),
+		zap.String("query_id", queryID),
+		zap.String("node_type", nodeType),
+	)
 
-			// Record actual loops
-			if actualLoops, ok := planData["Actual Loops"].(float64); ok {
-				nrqpc.mb.RecordPostgresqlExecutionPlanActualLoopsDataPoint(now, int64(actualLoops), plan.DatabaseName, plan.QueryID, nodeType)
-			}
+	// Record existing metrics
+	if parallelAware, ok := planData["Parallel Aware"].(bool); ok {
+		parallelAwareInt := int64(0)
+		if parallelAware {
+			parallelAwareInt = 1
+		}
+		nrqpc.mb.RecordPostgresqlExecutionPlanParallelAwareDataPoint(now, parallelAwareInt, databaseName, queryID, nodeType)
+	}
 
-			// Record actual total time
-			if actualTotalTime, ok := planData["Actual Total Time"].(float64); ok {
-				nrqpc.mb.RecordPostgresqlExecutionPlanActualTotalTimeDataPoint(now, actualTotalTime, plan.DatabaseName, plan.QueryID, nodeType)
+	if asyncCapable, ok := planData["Async Capable"].(bool); ok {
+		asyncCapableInt := int64(0)
+		if asyncCapable {
+			asyncCapableInt = 1
+		}
+		nrqpc.mb.RecordPostgresqlExecutionPlanAsyncCapableDataPoint(now, asyncCapableInt, databaseName, queryID, nodeType)
+	}
+
+	if actualRows, ok := planData["Actual Rows"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanActualRowsDataPoint(now, int64(actualRows), databaseName, queryID, nodeType)
+	}
+
+	if actualLoops, ok := planData["Actual Loops"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanActualLoopsDataPoint(now, int64(actualLoops), databaseName, queryID, nodeType)
+	}
+
+	if actualTotalTime, ok := planData["Actual Total Time"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanActualTotalTimeDataPoint(now, actualTotalTime, databaseName, queryID, nodeType)
+	}
+
+	// Record new detailed metrics
+	if totalCost, ok := planData["Total Cost"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanCostEstimateDataPoint(now, totalCost, databaseName, queryID, nodeType)
+	}
+
+	if startupCost, ok := planData["Startup Cost"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanStartupTimeDataPoint(now, startupCost, databaseName, queryID, nodeType)
+	}
+
+	if planRows, ok := planData["Plan Rows"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanPlanRowsDataPoint(now, int64(planRows), databaseName, queryID, nodeType)
+	}
+
+	if planWidth, ok := planData["Plan Width"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanPlanWidthDataPoint(now, int64(planWidth), databaseName, queryID, nodeType)
+	}
+
+	// Record I/O timing metrics
+	if ioReadTime, ok := planData["I/O Read Time"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanIoReadTimeDataPoint(now, ioReadTime, databaseName, queryID, nodeType)
+	}
+
+	if ioWriteTime, ok := planData["I/O Write Time"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanIoWriteTimeDataPoint(now, ioWriteTime, databaseName, queryID, nodeType)
+	}
+
+	// Record buffer usage metrics
+	if sharedHitBlocks, ok := planData["Shared Hit Blocks"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanSharedHitBlocksDataPoint(now, int64(sharedHitBlocks), databaseName, queryID, nodeType)
+	}
+
+	if sharedReadBlocks, ok := planData["Shared Read Blocks"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanSharedReadBlocksDataPoint(now, int64(sharedReadBlocks), databaseName, queryID, nodeType)
+	}
+
+	if sharedWrittenBlocks, ok := planData["Shared Written Blocks"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanSharedWrittenBlocksDataPoint(now, int64(sharedWrittenBlocks), databaseName, queryID, nodeType)
+	}
+
+	if tempReadBlocks, ok := planData["Temp Read Blocks"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanTempReadBlocksDataPoint(now, int64(tempReadBlocks), databaseName, queryID, nodeType)
+	}
+
+	if tempWrittenBlocks, ok := planData["Temp Written Blocks"].(float64); ok {
+		nrqpc.mb.RecordPostgresqlExecutionPlanTempWrittenBlocksDataPoint(now, int64(tempWrittenBlocks), databaseName, queryID, nodeType)
+	}
+
+	// Recursively process child plans
+	if plans, ok := planData["Plans"].([]interface{}); ok {
+		for _, childPlan := range plans {
+			if childPlanMap, ok := childPlan.(map[string]interface{}); ok {
+				nrqpc.recordPlanNodeMetrics(childPlanMap, databaseName, queryID, now)
 			}
 		}
 	}
 }
 
-// generateSlowQueryLog generates a log entry for slow queries
+// generateSlowQueryLog generates a detailed log entry for slow queries including execution plan info
 func (nrqpc *NewRelicQueryPerformanceCollector) generateSlowQueryLog(slowQuery SlowQueryInfo) {
 	logRecord := plog.NewLogRecord()
 	logRecord.SetTimestamp(pcommon.NewTimestampFromTime(time.Now()))
 	logRecord.SetSeverityNumber(plog.SeverityNumberWarn)
 	logRecord.SetSeverityText("WARN")
 	
+	// Enhanced log body with execution plan summary
+	executionPlan := nrqpc.executionPlans[slowQuery.QueryID]
+	var logBody strings.Builder
+	logBody.WriteString(fmt.Sprintf("Slow query detected: %s", slowQuery.QueryText))
+	
+	if executionPlan != nil {
+		logBody.WriteString(fmt.Sprintf("\nExecution Plan Available: %s", executionPlan.PlanID))
+		if planData, ok := executionPlan.Plan["Plan"].(map[string]interface{}); ok {
+			if nodeType, ok := planData["Node Type"].(string); ok {
+				logBody.WriteString(fmt.Sprintf("\nTop-level Node Type: %s", nodeType))
+			}
+			if totalCost, ok := planData["Total Cost"].(float64); ok {
+				logBody.WriteString(fmt.Sprintf("\nEstimated Total Cost: %.2f", totalCost))
+			}
+			if planRows, ok := planData["Plan Rows"].(float64); ok {
+				logBody.WriteString(fmt.Sprintf("\nEstimated Rows: %.0f", planRows))
+			}
+		}
+	}
+	
 	body := logRecord.Body()
-	body.SetStr(fmt.Sprintf("Slow query detected: %s", slowQuery.QueryText))
+	body.SetStr(logBody.String())
 	
 	attrs := logRecord.Attributes()
 	attrs.PutStr("postgresql.query.id", slowQuery.QueryID)
@@ -558,6 +686,36 @@ func (nrqpc *NewRelicQueryPerformanceCollector) generateSlowQueryLog(slowQuery S
 	attrs.PutDouble("postgresql.query.avg_disk_reads", slowQuery.AvgDiskReads)
 	attrs.PutDouble("postgresql.query.avg_disk_writes", slowQuery.AvgDiskWrites)
 	
+	// Add execution plan details to log attributes
+	if executionPlan != nil {
+		attrs.PutStr("postgresql.execution_plan.id", executionPlan.PlanID)
+		attrs.PutStr("postgresql.execution_plan.created_at", executionPlan.CreatedAt.Format(time.RFC3339))
+		
+		if planData, ok := executionPlan.Plan["Plan"].(map[string]interface{}); ok {
+			if nodeType, ok := planData["Node Type"].(string); ok {
+				attrs.PutStr("postgresql.execution_plan.top_node_type", nodeType)
+			}
+			if totalCost, ok := planData["Total Cost"].(float64); ok {
+				attrs.PutDouble("postgresql.execution_plan.total_cost", totalCost)
+			}
+			if startupCost, ok := planData["Startup Cost"].(float64); ok {
+				attrs.PutDouble("postgresql.execution_plan.startup_cost", startupCost)
+			}
+			if planRows, ok := planData["Plan Rows"].(float64); ok {
+				attrs.PutInt("postgresql.execution_plan.estimated_rows", int64(planRows))
+			}
+			if planWidth, ok := planData["Plan Width"].(float64); ok {
+				attrs.PutInt("postgresql.execution_plan.estimated_width", int64(planWidth))
+			}
+			if parallelAware, ok := planData["Parallel Aware"].(bool); ok {
+				attrs.PutBool("postgresql.execution_plan.parallel_aware", parallelAware)
+			}
+			if asyncCapable, ok := planData["Async Capable"].(bool); ok {
+				attrs.PutBool("postgresql.execution_plan.async_capable", asyncCapable)
+			}
+		}
+	}
+	
 	// Append the log record to the logs builder
 	nrqpc.lb.AppendLogRecord(logRecord)
 }
@@ -569,4 +727,55 @@ func (nrqpc *NewRelicQueryPerformanceCollector) formatDatabaseList(databases []s
 		quotedDatabases[i] = "'" + strings.ReplaceAll(db, "'", "''") + "'"
 	}
 	return strings.Join(quotedDatabases, ", ")
+}
+
+// shouldSkipExecutionPlan determines if a query should be skipped for execution plan generation
+func (nrqpc *NewRelicQueryPerformanceCollector) shouldSkipExecutionPlan(queryText string) bool {
+	upperQuery := strings.ToUpper(strings.TrimSpace(queryText))
+	
+	// Skip utility commands that can't be explained
+	skipPatterns := []string{
+		"ANALYZE",
+		"VACUUM",
+		"REINDEX",
+		"CLUSTER",
+		"TRUNCATE",
+		"DROP",
+		"CREATE INDEX",
+		"ALTER",
+		"GRANT",
+		"REVOKE",
+		"COMMENT",
+		"SET ",
+		"SHOW ",
+		"RESET",
+	}
+	
+	for _, pattern := range skipPatterns {
+		if strings.HasPrefix(upperQuery, pattern) {
+			return true
+		}
+	}
+	
+	return false
+}
+
+// cleanQueryForExplain cleans query text to make it suitable for EXPLAIN
+func (nrqpc *NewRelicQueryPerformanceCollector) cleanQueryForExplain(queryText string) string {
+	// Replace common parameter placeholders with dummy values
+	cleaned := queryText
+	
+	// Replace $1, $2, etc. with dummy values
+	for i := 1; i <= 20; i++ {
+		placeholder := fmt.Sprintf("$%d", i)
+		if strings.Contains(cleaned, placeholder) {
+			// Use a reasonable dummy value based on context
+			cleaned = strings.ReplaceAll(cleaned, placeholder, "1")
+		}
+	}
+	
+	// Replace ? placeholders with dummy values
+	cleaned = strings.ReplaceAll(cleaned, "?", "1")
+	
+	return cleaned
 }

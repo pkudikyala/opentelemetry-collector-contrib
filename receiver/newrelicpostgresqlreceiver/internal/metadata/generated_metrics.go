@@ -126,8 +126,17 @@ var MetricsInfo = metricsInfo{
 	PostgresqlBlockedSessionPid: metricInfo{
 		Name: "postgresql.blocked.session.pid",
 	},
+	PostgresqlBlockingSessionDuration: metricInfo{
+		Name: "postgresql.blocking.session.duration",
+	},
 	PostgresqlBlockingSessionPid: metricInfo{
 		Name: "postgresql.blocking.session.pid",
+	},
+	PostgresqlBlockingSessionWaitEvent: metricInfo{
+		Name: "postgresql.blocking.session.wait_event",
+	},
+	PostgresqlBlockingSessionWaitEventType: metricInfo{
+		Name: "postgresql.blocking.session.wait_event_type",
 	},
 	PostgresqlBlocksHit: metricInfo{
 		Name: "postgresql.blocks_hit",
@@ -162,8 +171,44 @@ var MetricsInfo = metricsInfo{
 	PostgresqlExecutionPlanAsyncCapable: metricInfo{
 		Name: "postgresql.execution_plan.async_capable",
 	},
+	PostgresqlExecutionPlanCostActual: metricInfo{
+		Name: "postgresql.execution_plan.cost_actual",
+	},
+	PostgresqlExecutionPlanCostEstimate: metricInfo{
+		Name: "postgresql.execution_plan.cost_estimate",
+	},
+	PostgresqlExecutionPlanIoReadTime: metricInfo{
+		Name: "postgresql.execution_plan.io_read_time",
+	},
+	PostgresqlExecutionPlanIoWriteTime: metricInfo{
+		Name: "postgresql.execution_plan.io_write_time",
+	},
 	PostgresqlExecutionPlanParallelAware: metricInfo{
 		Name: "postgresql.execution_plan.parallel_aware",
+	},
+	PostgresqlExecutionPlanPlanRows: metricInfo{
+		Name: "postgresql.execution_plan.plan_rows",
+	},
+	PostgresqlExecutionPlanPlanWidth: metricInfo{
+		Name: "postgresql.execution_plan.plan_width",
+	},
+	PostgresqlExecutionPlanSharedHitBlocks: metricInfo{
+		Name: "postgresql.execution_plan.shared_hit_blocks",
+	},
+	PostgresqlExecutionPlanSharedReadBlocks: metricInfo{
+		Name: "postgresql.execution_plan.shared_read_blocks",
+	},
+	PostgresqlExecutionPlanSharedWrittenBlocks: metricInfo{
+		Name: "postgresql.execution_plan.shared_written_blocks",
+	},
+	PostgresqlExecutionPlanStartupTime: metricInfo{
+		Name: "postgresql.execution_plan.startup_time",
+	},
+	PostgresqlExecutionPlanTempReadBlocks: metricInfo{
+		Name: "postgresql.execution_plan.temp_read_blocks",
+	},
+	PostgresqlExecutionPlanTempWrittenBlocks: metricInfo{
+		Name: "postgresql.execution_plan.temp_written_blocks",
 	},
 	PostgresqlIndexScans: metricInfo{
 		Name: "postgresql.index.scans",
@@ -216,36 +261,51 @@ var MetricsInfo = metricsInfo{
 }
 
 type metricsInfo struct {
-	PostgresqlBlockedSessionPid            metricInfo
-	PostgresqlBlockingSessionPid           metricInfo
-	PostgresqlBlocksHit                    metricInfo
-	PostgresqlBlocksRead                   metricInfo
-	PostgresqlCommits                      metricInfo
-	PostgresqlConnectionCount              metricInfo
-	PostgresqlConnectionMax                metricInfo
-	PostgresqlDatabaseCount                metricInfo
-	PostgresqlDatabaseLocks                metricInfo
-	PostgresqlExecutionPlanActualLoops     metricInfo
-	PostgresqlExecutionPlanActualRows      metricInfo
-	PostgresqlExecutionPlanActualTotalTime metricInfo
-	PostgresqlExecutionPlanAsyncCapable    metricInfo
-	PostgresqlExecutionPlanParallelAware   metricInfo
-	PostgresqlIndexScans                   metricInfo
-	PostgresqlIndexSize                    metricInfo
-	PostgresqlOperations                   metricInfo
-	PostgresqlQueryAvgDiskReads            metricInfo
-	PostgresqlQueryAvgDiskWrites           metricInfo
-	PostgresqlQueryAvgElapsedTime          metricInfo
-	PostgresqlQueryCPUTime                 metricInfo
-	PostgresqlQueryExecutionCount          metricInfo
-	PostgresqlRollbacks                    metricInfo
-	PostgresqlRows                         metricInfo
-	PostgresqlTableScans                   metricInfo
-	PostgresqlTableSize                    metricInfo
-	PostgresqlTableVacuumCount             metricInfo
-	PostgresqlWaitEventTotalTime           metricInfo
-	PostgresqlWalAge                       metricInfo
-	PostgresqlWalLag                       metricInfo
+	PostgresqlBlockedSessionPid                metricInfo
+	PostgresqlBlockingSessionDuration          metricInfo
+	PostgresqlBlockingSessionPid               metricInfo
+	PostgresqlBlockingSessionWaitEvent         metricInfo
+	PostgresqlBlockingSessionWaitEventType     metricInfo
+	PostgresqlBlocksHit                        metricInfo
+	PostgresqlBlocksRead                       metricInfo
+	PostgresqlCommits                          metricInfo
+	PostgresqlConnectionCount                  metricInfo
+	PostgresqlConnectionMax                    metricInfo
+	PostgresqlDatabaseCount                    metricInfo
+	PostgresqlDatabaseLocks                    metricInfo
+	PostgresqlExecutionPlanActualLoops         metricInfo
+	PostgresqlExecutionPlanActualRows          metricInfo
+	PostgresqlExecutionPlanActualTotalTime     metricInfo
+	PostgresqlExecutionPlanAsyncCapable        metricInfo
+	PostgresqlExecutionPlanCostActual          metricInfo
+	PostgresqlExecutionPlanCostEstimate        metricInfo
+	PostgresqlExecutionPlanIoReadTime          metricInfo
+	PostgresqlExecutionPlanIoWriteTime         metricInfo
+	PostgresqlExecutionPlanParallelAware       metricInfo
+	PostgresqlExecutionPlanPlanRows            metricInfo
+	PostgresqlExecutionPlanPlanWidth           metricInfo
+	PostgresqlExecutionPlanSharedHitBlocks     metricInfo
+	PostgresqlExecutionPlanSharedReadBlocks    metricInfo
+	PostgresqlExecutionPlanSharedWrittenBlocks metricInfo
+	PostgresqlExecutionPlanStartupTime         metricInfo
+	PostgresqlExecutionPlanTempReadBlocks      metricInfo
+	PostgresqlExecutionPlanTempWrittenBlocks   metricInfo
+	PostgresqlIndexScans                       metricInfo
+	PostgresqlIndexSize                        metricInfo
+	PostgresqlOperations                       metricInfo
+	PostgresqlQueryAvgDiskReads                metricInfo
+	PostgresqlQueryAvgDiskWrites               metricInfo
+	PostgresqlQueryAvgElapsedTime              metricInfo
+	PostgresqlQueryCPUTime                     metricInfo
+	PostgresqlQueryExecutionCount              metricInfo
+	PostgresqlRollbacks                        metricInfo
+	PostgresqlRows                             metricInfo
+	PostgresqlTableScans                       metricInfo
+	PostgresqlTableSize                        metricInfo
+	PostgresqlTableVacuumCount                 metricInfo
+	PostgresqlWaitEventTotalTime               metricInfo
+	PostgresqlWalAge                           metricInfo
+	PostgresqlWalLag                           metricInfo
 }
 
 type metricInfo struct {
@@ -304,6 +364,59 @@ func newMetricPostgresqlBlockedSessionPid(cfg MetricConfig) metricPostgresqlBloc
 	return m
 }
 
+type metricPostgresqlBlockingSessionDuration struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.blocking.session.duration metric with initial data.
+func (m *metricPostgresqlBlockingSessionDuration) init() {
+	m.data.SetName("postgresql.blocking.session.duration")
+	m.data.SetDescription("Duration for which the session has been blocking.")
+	m.data.SetUnit("s")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlBlockingSessionDuration) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocked.query.text", postgresqlBlockedQueryTextAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocking.query.text", postgresqlBlockingQueryTextAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlBlockingSessionDuration) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlBlockingSessionDuration) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlBlockingSessionDuration(cfg MetricConfig) metricPostgresqlBlockingSessionDuration {
+	m := metricPostgresqlBlockingSessionDuration{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricPostgresqlBlockingSessionPid struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	config   MetricConfig   // metric config provided by user.
@@ -349,6 +462,114 @@ func (m *metricPostgresqlBlockingSessionPid) emit(metrics pmetric.MetricSlice) {
 
 func newMetricPostgresqlBlockingSessionPid(cfg MetricConfig) metricPostgresqlBlockingSessionPid {
 	m := metricPostgresqlBlockingSessionPid{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlBlockingSessionWaitEvent struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.blocking.session.wait_event metric with initial data.
+func (m *metricPostgresqlBlockingSessionWaitEvent) init() {
+	m.data.SetName("postgresql.blocking.session.wait_event")
+	m.data.SetDescription("Wait event for the blocking session.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlBlockingSessionWaitEvent) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string, postgresqlWaitEventAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocked.query.text", postgresqlBlockedQueryTextAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocking.query.text", postgresqlBlockingQueryTextAttributeValue)
+	dp.Attributes().PutStr("postgresql.wait.event", postgresqlWaitEventAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlBlockingSessionWaitEvent) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlBlockingSessionWaitEvent) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlBlockingSessionWaitEvent(cfg MetricConfig) metricPostgresqlBlockingSessionWaitEvent {
+	m := metricPostgresqlBlockingSessionWaitEvent{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlBlockingSessionWaitEventType struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.blocking.session.wait_event_type metric with initial data.
+func (m *metricPostgresqlBlockingSessionWaitEventType) init() {
+	m.data.SetName("postgresql.blocking.session.wait_event_type")
+	m.data.SetDescription("Wait event type for the blocking session.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlBlockingSessionWaitEventType) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string, postgresqlWaitEventTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocked.query.text", postgresqlBlockedQueryTextAttributeValue)
+	dp.Attributes().PutStr("postgresql.blocking.query.text", postgresqlBlockingQueryTextAttributeValue)
+	dp.Attributes().PutStr("postgresql.wait.event.type", postgresqlWaitEventTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlBlockingSessionWaitEventType) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlBlockingSessionWaitEventType) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlBlockingSessionWaitEventType(cfg MetricConfig) metricPostgresqlBlockingSessionWaitEventType {
+	m := metricPostgresqlBlockingSessionWaitEventType{config: cfg}
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -933,6 +1154,218 @@ func newMetricPostgresqlExecutionPlanAsyncCapable(cfg MetricConfig) metricPostgr
 	return m
 }
 
+type metricPostgresqlExecutionPlanCostActual struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.cost_actual metric with initial data.
+func (m *metricPostgresqlExecutionPlanCostActual) init() {
+	m.data.SetName("postgresql.execution_plan.cost_actual")
+	m.data.SetDescription("Actual cost of the execution plan node.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanCostActual) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanCostActual) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanCostActual) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanCostActual(cfg MetricConfig) metricPostgresqlExecutionPlanCostActual {
+	m := metricPostgresqlExecutionPlanCostActual{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanCostEstimate struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.cost_estimate metric with initial data.
+func (m *metricPostgresqlExecutionPlanCostEstimate) init() {
+	m.data.SetName("postgresql.execution_plan.cost_estimate")
+	m.data.SetDescription("Estimated cost of the execution plan node.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanCostEstimate) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanCostEstimate) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanCostEstimate) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanCostEstimate(cfg MetricConfig) metricPostgresqlExecutionPlanCostEstimate {
+	m := metricPostgresqlExecutionPlanCostEstimate{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanIoReadTime struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.io_read_time metric with initial data.
+func (m *metricPostgresqlExecutionPlanIoReadTime) init() {
+	m.data.SetName("postgresql.execution_plan.io_read_time")
+	m.data.SetDescription("Time spent reading blocks from disk in milliseconds.")
+	m.data.SetUnit("ms")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanIoReadTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanIoReadTime) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanIoReadTime) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanIoReadTime(cfg MetricConfig) metricPostgresqlExecutionPlanIoReadTime {
+	m := metricPostgresqlExecutionPlanIoReadTime{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanIoWriteTime struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.io_write_time metric with initial data.
+func (m *metricPostgresqlExecutionPlanIoWriteTime) init() {
+	m.data.SetName("postgresql.execution_plan.io_write_time")
+	m.data.SetDescription("Time spent writing blocks to disk in milliseconds.")
+	m.data.SetUnit("ms")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanIoWriteTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanIoWriteTime) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanIoWriteTime) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanIoWriteTime(cfg MetricConfig) metricPostgresqlExecutionPlanIoWriteTime {
+	m := metricPostgresqlExecutionPlanIoWriteTime{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
 type metricPostgresqlExecutionPlanParallelAware struct {
 	data     pmetric.Metric // data buffer for generated metric.
 	config   MetricConfig   // metric config provided by user.
@@ -979,6 +1412,430 @@ func (m *metricPostgresqlExecutionPlanParallelAware) emit(metrics pmetric.Metric
 
 func newMetricPostgresqlExecutionPlanParallelAware(cfg MetricConfig) metricPostgresqlExecutionPlanParallelAware {
 	m := metricPostgresqlExecutionPlanParallelAware{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanPlanRows struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.plan_rows metric with initial data.
+func (m *metricPostgresqlExecutionPlanPlanRows) init() {
+	m.data.SetName("postgresql.execution_plan.plan_rows")
+	m.data.SetDescription("Estimated number of rows to be processed by the execution plan node.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanPlanRows) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanPlanRows) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanPlanRows) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanPlanRows(cfg MetricConfig) metricPostgresqlExecutionPlanPlanRows {
+	m := metricPostgresqlExecutionPlanPlanRows{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanPlanWidth struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.plan_width metric with initial data.
+func (m *metricPostgresqlExecutionPlanPlanWidth) init() {
+	m.data.SetName("postgresql.execution_plan.plan_width")
+	m.data.SetDescription("Estimated width of rows to be processed by the execution plan node.")
+	m.data.SetUnit("By")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanPlanWidth) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanPlanWidth) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanPlanWidth) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanPlanWidth(cfg MetricConfig) metricPostgresqlExecutionPlanPlanWidth {
+	m := metricPostgresqlExecutionPlanPlanWidth{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanSharedHitBlocks struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.shared_hit_blocks metric with initial data.
+func (m *metricPostgresqlExecutionPlanSharedHitBlocks) init() {
+	m.data.SetName("postgresql.execution_plan.shared_hit_blocks")
+	m.data.SetDescription("Number of shared blocks hit from cache.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanSharedHitBlocks) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanSharedHitBlocks) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanSharedHitBlocks) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanSharedHitBlocks(cfg MetricConfig) metricPostgresqlExecutionPlanSharedHitBlocks {
+	m := metricPostgresqlExecutionPlanSharedHitBlocks{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanSharedReadBlocks struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.shared_read_blocks metric with initial data.
+func (m *metricPostgresqlExecutionPlanSharedReadBlocks) init() {
+	m.data.SetName("postgresql.execution_plan.shared_read_blocks")
+	m.data.SetDescription("Number of shared blocks read from disk.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanSharedReadBlocks) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanSharedReadBlocks) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanSharedReadBlocks) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanSharedReadBlocks(cfg MetricConfig) metricPostgresqlExecutionPlanSharedReadBlocks {
+	m := metricPostgresqlExecutionPlanSharedReadBlocks{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanSharedWrittenBlocks struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.shared_written_blocks metric with initial data.
+func (m *metricPostgresqlExecutionPlanSharedWrittenBlocks) init() {
+	m.data.SetName("postgresql.execution_plan.shared_written_blocks")
+	m.data.SetDescription("Number of shared blocks written to disk.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanSharedWrittenBlocks) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanSharedWrittenBlocks) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanSharedWrittenBlocks) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanSharedWrittenBlocks(cfg MetricConfig) metricPostgresqlExecutionPlanSharedWrittenBlocks {
+	m := metricPostgresqlExecutionPlanSharedWrittenBlocks{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanStartupTime struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.startup_time metric with initial data.
+func (m *metricPostgresqlExecutionPlanStartupTime) init() {
+	m.data.SetName("postgresql.execution_plan.startup_time")
+	m.data.SetDescription("Time taken to start the execution plan node in milliseconds.")
+	m.data.SetUnit("ms")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanStartupTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetDoubleValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanStartupTime) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanStartupTime) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanStartupTime(cfg MetricConfig) metricPostgresqlExecutionPlanStartupTime {
+	m := metricPostgresqlExecutionPlanStartupTime{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanTempReadBlocks struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.temp_read_blocks metric with initial data.
+func (m *metricPostgresqlExecutionPlanTempReadBlocks) init() {
+	m.data.SetName("postgresql.execution_plan.temp_read_blocks")
+	m.data.SetDescription("Number of temporary blocks read from disk.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanTempReadBlocks) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanTempReadBlocks) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanTempReadBlocks) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanTempReadBlocks(cfg MetricConfig) metricPostgresqlExecutionPlanTempReadBlocks {
+	m := metricPostgresqlExecutionPlanTempReadBlocks{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
+}
+
+type metricPostgresqlExecutionPlanTempWrittenBlocks struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.execution_plan.temp_written_blocks metric with initial data.
+func (m *metricPostgresqlExecutionPlanTempWrittenBlocks) init() {
+	m.data.SetName("postgresql.execution_plan.temp_written_blocks")
+	m.data.SetDescription("Number of temporary blocks written to disk.")
+	m.data.SetUnit("1")
+	m.data.SetEmptyGauge()
+	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
+}
+
+func (m *metricPostgresqlExecutionPlanTempWrittenBlocks) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Gauge().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
+	dp.Attributes().PutStr("postgresql.node.type", postgresqlNodeTypeAttributeValue)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlExecutionPlanTempWrittenBlocks) updateCapacity() {
+	if m.data.Gauge().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Gauge().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlExecutionPlanTempWrittenBlocks) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Gauge().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlExecutionPlanTempWrittenBlocks(cfg MetricConfig) metricPostgresqlExecutionPlanTempWrittenBlocks {
+	m := metricPostgresqlExecutionPlanTempWrittenBlocks{config: cfg}
 	if cfg.Enabled {
 		m.data = pmetric.NewMetric()
 		m.init()
@@ -1853,43 +2710,58 @@ func newMetricPostgresqlWalLag(cfg MetricConfig) metricPostgresqlWalLag {
 // MetricsBuilder provides an interface for scrapers to report metrics while taking care of all the transformations
 // required to produce metric representation defined in metadata and user config.
 type MetricsBuilder struct {
-	config                                       MetricsBuilderConfig // config of the metrics builder.
-	startTime                                    pcommon.Timestamp    // start time that will be applied to all recorded data points.
-	metricsCapacity                              int                  // maximum observed number of metrics per resource.
-	metricsBuffer                                pmetric.Metrics      // accumulates metrics data before emitting.
-	buildInfo                                    component.BuildInfo  // contains version information.
-	resourceAttributeIncludeFilter               map[string]filter.Filter
-	resourceAttributeExcludeFilter               map[string]filter.Filter
-	metricPostgresqlBlockedSessionPid            metricPostgresqlBlockedSessionPid
-	metricPostgresqlBlockingSessionPid           metricPostgresqlBlockingSessionPid
-	metricPostgresqlBlocksHit                    metricPostgresqlBlocksHit
-	metricPostgresqlBlocksRead                   metricPostgresqlBlocksRead
-	metricPostgresqlCommits                      metricPostgresqlCommits
-	metricPostgresqlConnectionCount              metricPostgresqlConnectionCount
-	metricPostgresqlConnectionMax                metricPostgresqlConnectionMax
-	metricPostgresqlDatabaseCount                metricPostgresqlDatabaseCount
-	metricPostgresqlDatabaseLocks                metricPostgresqlDatabaseLocks
-	metricPostgresqlExecutionPlanActualLoops     metricPostgresqlExecutionPlanActualLoops
-	metricPostgresqlExecutionPlanActualRows      metricPostgresqlExecutionPlanActualRows
-	metricPostgresqlExecutionPlanActualTotalTime metricPostgresqlExecutionPlanActualTotalTime
-	metricPostgresqlExecutionPlanAsyncCapable    metricPostgresqlExecutionPlanAsyncCapable
-	metricPostgresqlExecutionPlanParallelAware   metricPostgresqlExecutionPlanParallelAware
-	metricPostgresqlIndexScans                   metricPostgresqlIndexScans
-	metricPostgresqlIndexSize                    metricPostgresqlIndexSize
-	metricPostgresqlOperations                   metricPostgresqlOperations
-	metricPostgresqlQueryAvgDiskReads            metricPostgresqlQueryAvgDiskReads
-	metricPostgresqlQueryAvgDiskWrites           metricPostgresqlQueryAvgDiskWrites
-	metricPostgresqlQueryAvgElapsedTime          metricPostgresqlQueryAvgElapsedTime
-	metricPostgresqlQueryCPUTime                 metricPostgresqlQueryCPUTime
-	metricPostgresqlQueryExecutionCount          metricPostgresqlQueryExecutionCount
-	metricPostgresqlRollbacks                    metricPostgresqlRollbacks
-	metricPostgresqlRows                         metricPostgresqlRows
-	metricPostgresqlTableScans                   metricPostgresqlTableScans
-	metricPostgresqlTableSize                    metricPostgresqlTableSize
-	metricPostgresqlTableVacuumCount             metricPostgresqlTableVacuumCount
-	metricPostgresqlWaitEventTotalTime           metricPostgresqlWaitEventTotalTime
-	metricPostgresqlWalAge                       metricPostgresqlWalAge
-	metricPostgresqlWalLag                       metricPostgresqlWalLag
+	config                                           MetricsBuilderConfig // config of the metrics builder.
+	startTime                                        pcommon.Timestamp    // start time that will be applied to all recorded data points.
+	metricsCapacity                                  int                  // maximum observed number of metrics per resource.
+	metricsBuffer                                    pmetric.Metrics      // accumulates metrics data before emitting.
+	buildInfo                                        component.BuildInfo  // contains version information.
+	resourceAttributeIncludeFilter                   map[string]filter.Filter
+	resourceAttributeExcludeFilter                   map[string]filter.Filter
+	metricPostgresqlBlockedSessionPid                metricPostgresqlBlockedSessionPid
+	metricPostgresqlBlockingSessionDuration          metricPostgresqlBlockingSessionDuration
+	metricPostgresqlBlockingSessionPid               metricPostgresqlBlockingSessionPid
+	metricPostgresqlBlockingSessionWaitEvent         metricPostgresqlBlockingSessionWaitEvent
+	metricPostgresqlBlockingSessionWaitEventType     metricPostgresqlBlockingSessionWaitEventType
+	metricPostgresqlBlocksHit                        metricPostgresqlBlocksHit
+	metricPostgresqlBlocksRead                       metricPostgresqlBlocksRead
+	metricPostgresqlCommits                          metricPostgresqlCommits
+	metricPostgresqlConnectionCount                  metricPostgresqlConnectionCount
+	metricPostgresqlConnectionMax                    metricPostgresqlConnectionMax
+	metricPostgresqlDatabaseCount                    metricPostgresqlDatabaseCount
+	metricPostgresqlDatabaseLocks                    metricPostgresqlDatabaseLocks
+	metricPostgresqlExecutionPlanActualLoops         metricPostgresqlExecutionPlanActualLoops
+	metricPostgresqlExecutionPlanActualRows          metricPostgresqlExecutionPlanActualRows
+	metricPostgresqlExecutionPlanActualTotalTime     metricPostgresqlExecutionPlanActualTotalTime
+	metricPostgresqlExecutionPlanAsyncCapable        metricPostgresqlExecutionPlanAsyncCapable
+	metricPostgresqlExecutionPlanCostActual          metricPostgresqlExecutionPlanCostActual
+	metricPostgresqlExecutionPlanCostEstimate        metricPostgresqlExecutionPlanCostEstimate
+	metricPostgresqlExecutionPlanIoReadTime          metricPostgresqlExecutionPlanIoReadTime
+	metricPostgresqlExecutionPlanIoWriteTime         metricPostgresqlExecutionPlanIoWriteTime
+	metricPostgresqlExecutionPlanParallelAware       metricPostgresqlExecutionPlanParallelAware
+	metricPostgresqlExecutionPlanPlanRows            metricPostgresqlExecutionPlanPlanRows
+	metricPostgresqlExecutionPlanPlanWidth           metricPostgresqlExecutionPlanPlanWidth
+	metricPostgresqlExecutionPlanSharedHitBlocks     metricPostgresqlExecutionPlanSharedHitBlocks
+	metricPostgresqlExecutionPlanSharedReadBlocks    metricPostgresqlExecutionPlanSharedReadBlocks
+	metricPostgresqlExecutionPlanSharedWrittenBlocks metricPostgresqlExecutionPlanSharedWrittenBlocks
+	metricPostgresqlExecutionPlanStartupTime         metricPostgresqlExecutionPlanStartupTime
+	metricPostgresqlExecutionPlanTempReadBlocks      metricPostgresqlExecutionPlanTempReadBlocks
+	metricPostgresqlExecutionPlanTempWrittenBlocks   metricPostgresqlExecutionPlanTempWrittenBlocks
+	metricPostgresqlIndexScans                       metricPostgresqlIndexScans
+	metricPostgresqlIndexSize                        metricPostgresqlIndexSize
+	metricPostgresqlOperations                       metricPostgresqlOperations
+	metricPostgresqlQueryAvgDiskReads                metricPostgresqlQueryAvgDiskReads
+	metricPostgresqlQueryAvgDiskWrites               metricPostgresqlQueryAvgDiskWrites
+	metricPostgresqlQueryAvgElapsedTime              metricPostgresqlQueryAvgElapsedTime
+	metricPostgresqlQueryCPUTime                     metricPostgresqlQueryCPUTime
+	metricPostgresqlQueryExecutionCount              metricPostgresqlQueryExecutionCount
+	metricPostgresqlRollbacks                        metricPostgresqlRollbacks
+	metricPostgresqlRows                             metricPostgresqlRows
+	metricPostgresqlTableScans                       metricPostgresqlTableScans
+	metricPostgresqlTableSize                        metricPostgresqlTableSize
+	metricPostgresqlTableVacuumCount                 metricPostgresqlTableVacuumCount
+	metricPostgresqlWaitEventTotalTime               metricPostgresqlWaitEventTotalTime
+	metricPostgresqlWalAge                           metricPostgresqlWalAge
+	metricPostgresqlWalLag                           metricPostgresqlWalLag
 }
 
 // MetricBuilderOption applies changes to default metrics builder.
@@ -1911,42 +2783,57 @@ func WithStartTime(startTime pcommon.Timestamp) MetricBuilderOption {
 }
 func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.Settings, options ...MetricBuilderOption) *MetricsBuilder {
 	mb := &MetricsBuilder{
-		config:                                       mbc,
-		startTime:                                    pcommon.NewTimestampFromTime(time.Now()),
-		metricsBuffer:                                pmetric.NewMetrics(),
-		buildInfo:                                    settings.BuildInfo,
-		metricPostgresqlBlockedSessionPid:            newMetricPostgresqlBlockedSessionPid(mbc.Metrics.PostgresqlBlockedSessionPid),
-		metricPostgresqlBlockingSessionPid:           newMetricPostgresqlBlockingSessionPid(mbc.Metrics.PostgresqlBlockingSessionPid),
-		metricPostgresqlBlocksHit:                    newMetricPostgresqlBlocksHit(mbc.Metrics.PostgresqlBlocksHit),
-		metricPostgresqlBlocksRead:                   newMetricPostgresqlBlocksRead(mbc.Metrics.PostgresqlBlocksRead),
-		metricPostgresqlCommits:                      newMetricPostgresqlCommits(mbc.Metrics.PostgresqlCommits),
-		metricPostgresqlConnectionCount:              newMetricPostgresqlConnectionCount(mbc.Metrics.PostgresqlConnectionCount),
-		metricPostgresqlConnectionMax:                newMetricPostgresqlConnectionMax(mbc.Metrics.PostgresqlConnectionMax),
-		metricPostgresqlDatabaseCount:                newMetricPostgresqlDatabaseCount(mbc.Metrics.PostgresqlDatabaseCount),
-		metricPostgresqlDatabaseLocks:                newMetricPostgresqlDatabaseLocks(mbc.Metrics.PostgresqlDatabaseLocks),
-		metricPostgresqlExecutionPlanActualLoops:     newMetricPostgresqlExecutionPlanActualLoops(mbc.Metrics.PostgresqlExecutionPlanActualLoops),
-		metricPostgresqlExecutionPlanActualRows:      newMetricPostgresqlExecutionPlanActualRows(mbc.Metrics.PostgresqlExecutionPlanActualRows),
-		metricPostgresqlExecutionPlanActualTotalTime: newMetricPostgresqlExecutionPlanActualTotalTime(mbc.Metrics.PostgresqlExecutionPlanActualTotalTime),
-		metricPostgresqlExecutionPlanAsyncCapable:    newMetricPostgresqlExecutionPlanAsyncCapable(mbc.Metrics.PostgresqlExecutionPlanAsyncCapable),
-		metricPostgresqlExecutionPlanParallelAware:   newMetricPostgresqlExecutionPlanParallelAware(mbc.Metrics.PostgresqlExecutionPlanParallelAware),
-		metricPostgresqlIndexScans:                   newMetricPostgresqlIndexScans(mbc.Metrics.PostgresqlIndexScans),
-		metricPostgresqlIndexSize:                    newMetricPostgresqlIndexSize(mbc.Metrics.PostgresqlIndexSize),
-		metricPostgresqlOperations:                   newMetricPostgresqlOperations(mbc.Metrics.PostgresqlOperations),
-		metricPostgresqlQueryAvgDiskReads:            newMetricPostgresqlQueryAvgDiskReads(mbc.Metrics.PostgresqlQueryAvgDiskReads),
-		metricPostgresqlQueryAvgDiskWrites:           newMetricPostgresqlQueryAvgDiskWrites(mbc.Metrics.PostgresqlQueryAvgDiskWrites),
-		metricPostgresqlQueryAvgElapsedTime:          newMetricPostgresqlQueryAvgElapsedTime(mbc.Metrics.PostgresqlQueryAvgElapsedTime),
-		metricPostgresqlQueryCPUTime:                 newMetricPostgresqlQueryCPUTime(mbc.Metrics.PostgresqlQueryCPUTime),
-		metricPostgresqlQueryExecutionCount:          newMetricPostgresqlQueryExecutionCount(mbc.Metrics.PostgresqlQueryExecutionCount),
-		metricPostgresqlRollbacks:                    newMetricPostgresqlRollbacks(mbc.Metrics.PostgresqlRollbacks),
-		metricPostgresqlRows:                         newMetricPostgresqlRows(mbc.Metrics.PostgresqlRows),
-		metricPostgresqlTableScans:                   newMetricPostgresqlTableScans(mbc.Metrics.PostgresqlTableScans),
-		metricPostgresqlTableSize:                    newMetricPostgresqlTableSize(mbc.Metrics.PostgresqlTableSize),
-		metricPostgresqlTableVacuumCount:             newMetricPostgresqlTableVacuumCount(mbc.Metrics.PostgresqlTableVacuumCount),
-		metricPostgresqlWaitEventTotalTime:           newMetricPostgresqlWaitEventTotalTime(mbc.Metrics.PostgresqlWaitEventTotalTime),
-		metricPostgresqlWalAge:                       newMetricPostgresqlWalAge(mbc.Metrics.PostgresqlWalAge),
-		metricPostgresqlWalLag:                       newMetricPostgresqlWalLag(mbc.Metrics.PostgresqlWalLag),
-		resourceAttributeIncludeFilter:               make(map[string]filter.Filter),
-		resourceAttributeExcludeFilter:               make(map[string]filter.Filter),
+		config:                                           mbc,
+		startTime:                                        pcommon.NewTimestampFromTime(time.Now()),
+		metricsBuffer:                                    pmetric.NewMetrics(),
+		buildInfo:                                        settings.BuildInfo,
+		metricPostgresqlBlockedSessionPid:                newMetricPostgresqlBlockedSessionPid(mbc.Metrics.PostgresqlBlockedSessionPid),
+		metricPostgresqlBlockingSessionDuration:          newMetricPostgresqlBlockingSessionDuration(mbc.Metrics.PostgresqlBlockingSessionDuration),
+		metricPostgresqlBlockingSessionPid:               newMetricPostgresqlBlockingSessionPid(mbc.Metrics.PostgresqlBlockingSessionPid),
+		metricPostgresqlBlockingSessionWaitEvent:         newMetricPostgresqlBlockingSessionWaitEvent(mbc.Metrics.PostgresqlBlockingSessionWaitEvent),
+		metricPostgresqlBlockingSessionWaitEventType:     newMetricPostgresqlBlockingSessionWaitEventType(mbc.Metrics.PostgresqlBlockingSessionWaitEventType),
+		metricPostgresqlBlocksHit:                        newMetricPostgresqlBlocksHit(mbc.Metrics.PostgresqlBlocksHit),
+		metricPostgresqlBlocksRead:                       newMetricPostgresqlBlocksRead(mbc.Metrics.PostgresqlBlocksRead),
+		metricPostgresqlCommits:                          newMetricPostgresqlCommits(mbc.Metrics.PostgresqlCommits),
+		metricPostgresqlConnectionCount:                  newMetricPostgresqlConnectionCount(mbc.Metrics.PostgresqlConnectionCount),
+		metricPostgresqlConnectionMax:                    newMetricPostgresqlConnectionMax(mbc.Metrics.PostgresqlConnectionMax),
+		metricPostgresqlDatabaseCount:                    newMetricPostgresqlDatabaseCount(mbc.Metrics.PostgresqlDatabaseCount),
+		metricPostgresqlDatabaseLocks:                    newMetricPostgresqlDatabaseLocks(mbc.Metrics.PostgresqlDatabaseLocks),
+		metricPostgresqlExecutionPlanActualLoops:         newMetricPostgresqlExecutionPlanActualLoops(mbc.Metrics.PostgresqlExecutionPlanActualLoops),
+		metricPostgresqlExecutionPlanActualRows:          newMetricPostgresqlExecutionPlanActualRows(mbc.Metrics.PostgresqlExecutionPlanActualRows),
+		metricPostgresqlExecutionPlanActualTotalTime:     newMetricPostgresqlExecutionPlanActualTotalTime(mbc.Metrics.PostgresqlExecutionPlanActualTotalTime),
+		metricPostgresqlExecutionPlanAsyncCapable:        newMetricPostgresqlExecutionPlanAsyncCapable(mbc.Metrics.PostgresqlExecutionPlanAsyncCapable),
+		metricPostgresqlExecutionPlanCostActual:          newMetricPostgresqlExecutionPlanCostActual(mbc.Metrics.PostgresqlExecutionPlanCostActual),
+		metricPostgresqlExecutionPlanCostEstimate:        newMetricPostgresqlExecutionPlanCostEstimate(mbc.Metrics.PostgresqlExecutionPlanCostEstimate),
+		metricPostgresqlExecutionPlanIoReadTime:          newMetricPostgresqlExecutionPlanIoReadTime(mbc.Metrics.PostgresqlExecutionPlanIoReadTime),
+		metricPostgresqlExecutionPlanIoWriteTime:         newMetricPostgresqlExecutionPlanIoWriteTime(mbc.Metrics.PostgresqlExecutionPlanIoWriteTime),
+		metricPostgresqlExecutionPlanParallelAware:       newMetricPostgresqlExecutionPlanParallelAware(mbc.Metrics.PostgresqlExecutionPlanParallelAware),
+		metricPostgresqlExecutionPlanPlanRows:            newMetricPostgresqlExecutionPlanPlanRows(mbc.Metrics.PostgresqlExecutionPlanPlanRows),
+		metricPostgresqlExecutionPlanPlanWidth:           newMetricPostgresqlExecutionPlanPlanWidth(mbc.Metrics.PostgresqlExecutionPlanPlanWidth),
+		metricPostgresqlExecutionPlanSharedHitBlocks:     newMetricPostgresqlExecutionPlanSharedHitBlocks(mbc.Metrics.PostgresqlExecutionPlanSharedHitBlocks),
+		metricPostgresqlExecutionPlanSharedReadBlocks:    newMetricPostgresqlExecutionPlanSharedReadBlocks(mbc.Metrics.PostgresqlExecutionPlanSharedReadBlocks),
+		metricPostgresqlExecutionPlanSharedWrittenBlocks: newMetricPostgresqlExecutionPlanSharedWrittenBlocks(mbc.Metrics.PostgresqlExecutionPlanSharedWrittenBlocks),
+		metricPostgresqlExecutionPlanStartupTime:         newMetricPostgresqlExecutionPlanStartupTime(mbc.Metrics.PostgresqlExecutionPlanStartupTime),
+		metricPostgresqlExecutionPlanTempReadBlocks:      newMetricPostgresqlExecutionPlanTempReadBlocks(mbc.Metrics.PostgresqlExecutionPlanTempReadBlocks),
+		metricPostgresqlExecutionPlanTempWrittenBlocks:   newMetricPostgresqlExecutionPlanTempWrittenBlocks(mbc.Metrics.PostgresqlExecutionPlanTempWrittenBlocks),
+		metricPostgresqlIndexScans:                       newMetricPostgresqlIndexScans(mbc.Metrics.PostgresqlIndexScans),
+		metricPostgresqlIndexSize:                        newMetricPostgresqlIndexSize(mbc.Metrics.PostgresqlIndexSize),
+		metricPostgresqlOperations:                       newMetricPostgresqlOperations(mbc.Metrics.PostgresqlOperations),
+		metricPostgresqlQueryAvgDiskReads:                newMetricPostgresqlQueryAvgDiskReads(mbc.Metrics.PostgresqlQueryAvgDiskReads),
+		metricPostgresqlQueryAvgDiskWrites:               newMetricPostgresqlQueryAvgDiskWrites(mbc.Metrics.PostgresqlQueryAvgDiskWrites),
+		metricPostgresqlQueryAvgElapsedTime:              newMetricPostgresqlQueryAvgElapsedTime(mbc.Metrics.PostgresqlQueryAvgElapsedTime),
+		metricPostgresqlQueryCPUTime:                     newMetricPostgresqlQueryCPUTime(mbc.Metrics.PostgresqlQueryCPUTime),
+		metricPostgresqlQueryExecutionCount:              newMetricPostgresqlQueryExecutionCount(mbc.Metrics.PostgresqlQueryExecutionCount),
+		metricPostgresqlRollbacks:                        newMetricPostgresqlRollbacks(mbc.Metrics.PostgresqlRollbacks),
+		metricPostgresqlRows:                             newMetricPostgresqlRows(mbc.Metrics.PostgresqlRows),
+		metricPostgresqlTableScans:                       newMetricPostgresqlTableScans(mbc.Metrics.PostgresqlTableScans),
+		metricPostgresqlTableSize:                        newMetricPostgresqlTableSize(mbc.Metrics.PostgresqlTableSize),
+		metricPostgresqlTableVacuumCount:                 newMetricPostgresqlTableVacuumCount(mbc.Metrics.PostgresqlTableVacuumCount),
+		metricPostgresqlWaitEventTotalTime:               newMetricPostgresqlWaitEventTotalTime(mbc.Metrics.PostgresqlWaitEventTotalTime),
+		metricPostgresqlWalAge:                           newMetricPostgresqlWalAge(mbc.Metrics.PostgresqlWalAge),
+		metricPostgresqlWalLag:                           newMetricPostgresqlWalLag(mbc.Metrics.PostgresqlWalLag),
+		resourceAttributeIncludeFilter:                   make(map[string]filter.Filter),
+		resourceAttributeExcludeFilter:                   make(map[string]filter.Filter),
 	}
 	if mbc.ResourceAttributes.PostgresqlDatabaseName.MetricsInclude != nil {
 		mb.resourceAttributeIncludeFilter["postgresql.database.name"] = filter.CreateFilter(mbc.ResourceAttributes.PostgresqlDatabaseName.MetricsInclude)
@@ -2042,7 +2929,10 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
 	mb.metricPostgresqlBlockedSessionPid.emit(ils.Metrics())
+	mb.metricPostgresqlBlockingSessionDuration.emit(ils.Metrics())
 	mb.metricPostgresqlBlockingSessionPid.emit(ils.Metrics())
+	mb.metricPostgresqlBlockingSessionWaitEvent.emit(ils.Metrics())
+	mb.metricPostgresqlBlockingSessionWaitEventType.emit(ils.Metrics())
 	mb.metricPostgresqlBlocksHit.emit(ils.Metrics())
 	mb.metricPostgresqlBlocksRead.emit(ils.Metrics())
 	mb.metricPostgresqlCommits.emit(ils.Metrics())
@@ -2054,7 +2944,19 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	mb.metricPostgresqlExecutionPlanActualRows.emit(ils.Metrics())
 	mb.metricPostgresqlExecutionPlanActualTotalTime.emit(ils.Metrics())
 	mb.metricPostgresqlExecutionPlanAsyncCapable.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanCostActual.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanCostEstimate.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanIoReadTime.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanIoWriteTime.emit(ils.Metrics())
 	mb.metricPostgresqlExecutionPlanParallelAware.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanPlanRows.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanPlanWidth.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanSharedHitBlocks.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanSharedReadBlocks.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanSharedWrittenBlocks.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanStartupTime.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanTempReadBlocks.emit(ils.Metrics())
+	mb.metricPostgresqlExecutionPlanTempWrittenBlocks.emit(ils.Metrics())
 	mb.metricPostgresqlIndexScans.emit(ils.Metrics())
 	mb.metricPostgresqlIndexSize.emit(ils.Metrics())
 	mb.metricPostgresqlOperations.emit(ils.Metrics())
@@ -2107,9 +3009,24 @@ func (mb *MetricsBuilder) RecordPostgresqlBlockedSessionPidDataPoint(ts pcommon.
 	mb.metricPostgresqlBlockedSessionPid.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryTextAttributeValue)
 }
 
+// RecordPostgresqlBlockingSessionDurationDataPoint adds a data point to postgresql.blocking.session.duration metric.
+func (mb *MetricsBuilder) RecordPostgresqlBlockingSessionDurationDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string) {
+	mb.metricPostgresqlBlockingSessionDuration.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlBlockedQueryTextAttributeValue, postgresqlBlockingQueryTextAttributeValue)
+}
+
 // RecordPostgresqlBlockingSessionPidDataPoint adds a data point to postgresql.blocking.session.pid metric.
 func (mb *MetricsBuilder) RecordPostgresqlBlockingSessionPidDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryTextAttributeValue string) {
 	mb.metricPostgresqlBlockingSessionPid.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryTextAttributeValue)
+}
+
+// RecordPostgresqlBlockingSessionWaitEventDataPoint adds a data point to postgresql.blocking.session.wait_event metric.
+func (mb *MetricsBuilder) RecordPostgresqlBlockingSessionWaitEventDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string, postgresqlWaitEventAttributeValue string) {
+	mb.metricPostgresqlBlockingSessionWaitEvent.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlBlockedQueryTextAttributeValue, postgresqlBlockingQueryTextAttributeValue, postgresqlWaitEventAttributeValue)
+}
+
+// RecordPostgresqlBlockingSessionWaitEventTypeDataPoint adds a data point to postgresql.blocking.session.wait_event_type metric.
+func (mb *MetricsBuilder) RecordPostgresqlBlockingSessionWaitEventTypeDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlBlockedQueryTextAttributeValue string, postgresqlBlockingQueryTextAttributeValue string, postgresqlWaitEventTypeAttributeValue string) {
+	mb.metricPostgresqlBlockingSessionWaitEventType.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlBlockedQueryTextAttributeValue, postgresqlBlockingQueryTextAttributeValue, postgresqlWaitEventTypeAttributeValue)
 }
 
 // RecordPostgresqlBlocksHitDataPoint adds a data point to postgresql.blocks_hit metric.
@@ -2167,9 +3084,69 @@ func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanAsyncCapableDataPoint(ts 
 	mb.metricPostgresqlExecutionPlanAsyncCapable.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
 }
 
+// RecordPostgresqlExecutionPlanCostActualDataPoint adds a data point to postgresql.execution_plan.cost_actual metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanCostActualDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanCostActual.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanCostEstimateDataPoint adds a data point to postgresql.execution_plan.cost_estimate metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanCostEstimateDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanCostEstimate.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanIoReadTimeDataPoint adds a data point to postgresql.execution_plan.io_read_time metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanIoReadTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanIoReadTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanIoWriteTimeDataPoint adds a data point to postgresql.execution_plan.io_write_time metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanIoWriteTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanIoWriteTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
 // RecordPostgresqlExecutionPlanParallelAwareDataPoint adds a data point to postgresql.execution_plan.parallel_aware metric.
 func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanParallelAwareDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
 	mb.metricPostgresqlExecutionPlanParallelAware.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanPlanRowsDataPoint adds a data point to postgresql.execution_plan.plan_rows metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanPlanRowsDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanPlanRows.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanPlanWidthDataPoint adds a data point to postgresql.execution_plan.plan_width metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanPlanWidthDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanPlanWidth.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanSharedHitBlocksDataPoint adds a data point to postgresql.execution_plan.shared_hit_blocks metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanSharedHitBlocksDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanSharedHitBlocks.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanSharedReadBlocksDataPoint adds a data point to postgresql.execution_plan.shared_read_blocks metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanSharedReadBlocksDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanSharedReadBlocks.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanSharedWrittenBlocksDataPoint adds a data point to postgresql.execution_plan.shared_written_blocks metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanSharedWrittenBlocksDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanSharedWrittenBlocks.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanStartupTimeDataPoint adds a data point to postgresql.execution_plan.startup_time metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanStartupTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanStartupTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanTempReadBlocksDataPoint adds a data point to postgresql.execution_plan.temp_read_blocks metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanTempReadBlocksDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanTempReadBlocks.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
+}
+
+// RecordPostgresqlExecutionPlanTempWrittenBlocksDataPoint adds a data point to postgresql.execution_plan.temp_written_blocks metric.
+func (mb *MetricsBuilder) RecordPostgresqlExecutionPlanTempWrittenBlocksDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlNodeTypeAttributeValue string) {
+	mb.metricPostgresqlExecutionPlanTempWrittenBlocks.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlNodeTypeAttributeValue)
 }
 
 // RecordPostgresqlIndexScansDataPoint adds a data point to postgresql.index.scans metric.

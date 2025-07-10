@@ -28,36 +28,51 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for newrelicpostgresql metrics.
 type MetricsConfig struct {
-	PostgresqlBlockedSessionPid            MetricConfig `mapstructure:"postgresql.blocked.session.pid"`
-	PostgresqlBlockingSessionPid           MetricConfig `mapstructure:"postgresql.blocking.session.pid"`
-	PostgresqlBlocksHit                    MetricConfig `mapstructure:"postgresql.blocks_hit"`
-	PostgresqlBlocksRead                   MetricConfig `mapstructure:"postgresql.blocks_read"`
-	PostgresqlCommits                      MetricConfig `mapstructure:"postgresql.commits"`
-	PostgresqlConnectionCount              MetricConfig `mapstructure:"postgresql.connection.count"`
-	PostgresqlConnectionMax                MetricConfig `mapstructure:"postgresql.connection.max"`
-	PostgresqlDatabaseCount                MetricConfig `mapstructure:"postgresql.database.count"`
-	PostgresqlDatabaseLocks                MetricConfig `mapstructure:"postgresql.database.locks"`
-	PostgresqlExecutionPlanActualLoops     MetricConfig `mapstructure:"postgresql.execution_plan.actual_loops"`
-	PostgresqlExecutionPlanActualRows      MetricConfig `mapstructure:"postgresql.execution_plan.actual_rows"`
-	PostgresqlExecutionPlanActualTotalTime MetricConfig `mapstructure:"postgresql.execution_plan.actual_total_time"`
-	PostgresqlExecutionPlanAsyncCapable    MetricConfig `mapstructure:"postgresql.execution_plan.async_capable"`
-	PostgresqlExecutionPlanParallelAware   MetricConfig `mapstructure:"postgresql.execution_plan.parallel_aware"`
-	PostgresqlIndexScans                   MetricConfig `mapstructure:"postgresql.index.scans"`
-	PostgresqlIndexSize                    MetricConfig `mapstructure:"postgresql.index.size"`
-	PostgresqlOperations                   MetricConfig `mapstructure:"postgresql.operations"`
-	PostgresqlQueryAvgDiskReads            MetricConfig `mapstructure:"postgresql.query.avg_disk_reads"`
-	PostgresqlQueryAvgDiskWrites           MetricConfig `mapstructure:"postgresql.query.avg_disk_writes"`
-	PostgresqlQueryAvgElapsedTime          MetricConfig `mapstructure:"postgresql.query.avg_elapsed_time"`
-	PostgresqlQueryCPUTime                 MetricConfig `mapstructure:"postgresql.query.cpu_time"`
-	PostgresqlQueryExecutionCount          MetricConfig `mapstructure:"postgresql.query.execution.count"`
-	PostgresqlRollbacks                    MetricConfig `mapstructure:"postgresql.rollbacks"`
-	PostgresqlRows                         MetricConfig `mapstructure:"postgresql.rows"`
-	PostgresqlTableScans                   MetricConfig `mapstructure:"postgresql.table.scans"`
-	PostgresqlTableSize                    MetricConfig `mapstructure:"postgresql.table.size"`
-	PostgresqlTableVacuumCount             MetricConfig `mapstructure:"postgresql.table.vacuum.count"`
-	PostgresqlWaitEventTotalTime           MetricConfig `mapstructure:"postgresql.wait.event.total_time"`
-	PostgresqlWalAge                       MetricConfig `mapstructure:"postgresql.wal.age"`
-	PostgresqlWalLag                       MetricConfig `mapstructure:"postgresql.wal.lag"`
+	PostgresqlBlockedSessionPid                MetricConfig `mapstructure:"postgresql.blocked.session.pid"`
+	PostgresqlBlockingSessionDuration          MetricConfig `mapstructure:"postgresql.blocking.session.duration"`
+	PostgresqlBlockingSessionPid               MetricConfig `mapstructure:"postgresql.blocking.session.pid"`
+	PostgresqlBlockingSessionWaitEvent         MetricConfig `mapstructure:"postgresql.blocking.session.wait_event"`
+	PostgresqlBlockingSessionWaitEventType     MetricConfig `mapstructure:"postgresql.blocking.session.wait_event_type"`
+	PostgresqlBlocksHit                        MetricConfig `mapstructure:"postgresql.blocks_hit"`
+	PostgresqlBlocksRead                       MetricConfig `mapstructure:"postgresql.blocks_read"`
+	PostgresqlCommits                          MetricConfig `mapstructure:"postgresql.commits"`
+	PostgresqlConnectionCount                  MetricConfig `mapstructure:"postgresql.connection.count"`
+	PostgresqlConnectionMax                    MetricConfig `mapstructure:"postgresql.connection.max"`
+	PostgresqlDatabaseCount                    MetricConfig `mapstructure:"postgresql.database.count"`
+	PostgresqlDatabaseLocks                    MetricConfig `mapstructure:"postgresql.database.locks"`
+	PostgresqlExecutionPlanActualLoops         MetricConfig `mapstructure:"postgresql.execution_plan.actual_loops"`
+	PostgresqlExecutionPlanActualRows          MetricConfig `mapstructure:"postgresql.execution_plan.actual_rows"`
+	PostgresqlExecutionPlanActualTotalTime     MetricConfig `mapstructure:"postgresql.execution_plan.actual_total_time"`
+	PostgresqlExecutionPlanAsyncCapable        MetricConfig `mapstructure:"postgresql.execution_plan.async_capable"`
+	PostgresqlExecutionPlanCostActual          MetricConfig `mapstructure:"postgresql.execution_plan.cost_actual"`
+	PostgresqlExecutionPlanCostEstimate        MetricConfig `mapstructure:"postgresql.execution_plan.cost_estimate"`
+	PostgresqlExecutionPlanIoReadTime          MetricConfig `mapstructure:"postgresql.execution_plan.io_read_time"`
+	PostgresqlExecutionPlanIoWriteTime         MetricConfig `mapstructure:"postgresql.execution_plan.io_write_time"`
+	PostgresqlExecutionPlanParallelAware       MetricConfig `mapstructure:"postgresql.execution_plan.parallel_aware"`
+	PostgresqlExecutionPlanPlanRows            MetricConfig `mapstructure:"postgresql.execution_plan.plan_rows"`
+	PostgresqlExecutionPlanPlanWidth           MetricConfig `mapstructure:"postgresql.execution_plan.plan_width"`
+	PostgresqlExecutionPlanSharedHitBlocks     MetricConfig `mapstructure:"postgresql.execution_plan.shared_hit_blocks"`
+	PostgresqlExecutionPlanSharedReadBlocks    MetricConfig `mapstructure:"postgresql.execution_plan.shared_read_blocks"`
+	PostgresqlExecutionPlanSharedWrittenBlocks MetricConfig `mapstructure:"postgresql.execution_plan.shared_written_blocks"`
+	PostgresqlExecutionPlanStartupTime         MetricConfig `mapstructure:"postgresql.execution_plan.startup_time"`
+	PostgresqlExecutionPlanTempReadBlocks      MetricConfig `mapstructure:"postgresql.execution_plan.temp_read_blocks"`
+	PostgresqlExecutionPlanTempWrittenBlocks   MetricConfig `mapstructure:"postgresql.execution_plan.temp_written_blocks"`
+	PostgresqlIndexScans                       MetricConfig `mapstructure:"postgresql.index.scans"`
+	PostgresqlIndexSize                        MetricConfig `mapstructure:"postgresql.index.size"`
+	PostgresqlOperations                       MetricConfig `mapstructure:"postgresql.operations"`
+	PostgresqlQueryAvgDiskReads                MetricConfig `mapstructure:"postgresql.query.avg_disk_reads"`
+	PostgresqlQueryAvgDiskWrites               MetricConfig `mapstructure:"postgresql.query.avg_disk_writes"`
+	PostgresqlQueryAvgElapsedTime              MetricConfig `mapstructure:"postgresql.query.avg_elapsed_time"`
+	PostgresqlQueryCPUTime                     MetricConfig `mapstructure:"postgresql.query.cpu_time"`
+	PostgresqlQueryExecutionCount              MetricConfig `mapstructure:"postgresql.query.execution.count"`
+	PostgresqlRollbacks                        MetricConfig `mapstructure:"postgresql.rollbacks"`
+	PostgresqlRows                             MetricConfig `mapstructure:"postgresql.rows"`
+	PostgresqlTableScans                       MetricConfig `mapstructure:"postgresql.table.scans"`
+	PostgresqlTableSize                        MetricConfig `mapstructure:"postgresql.table.size"`
+	PostgresqlTableVacuumCount                 MetricConfig `mapstructure:"postgresql.table.vacuum.count"`
+	PostgresqlWaitEventTotalTime               MetricConfig `mapstructure:"postgresql.wait.event.total_time"`
+	PostgresqlWalAge                           MetricConfig `mapstructure:"postgresql.wal.age"`
+	PostgresqlWalLag                           MetricConfig `mapstructure:"postgresql.wal.lag"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
@@ -65,7 +80,16 @@ func DefaultMetricsConfig() MetricsConfig {
 		PostgresqlBlockedSessionPid: MetricConfig{
 			Enabled: true,
 		},
+		PostgresqlBlockingSessionDuration: MetricConfig{
+			Enabled: true,
+		},
 		PostgresqlBlockingSessionPid: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBlockingSessionWaitEvent: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBlockingSessionWaitEventType: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlBlocksHit: MetricConfig{
@@ -101,7 +125,43 @@ func DefaultMetricsConfig() MetricsConfig {
 		PostgresqlExecutionPlanAsyncCapable: MetricConfig{
 			Enabled: true,
 		},
+		PostgresqlExecutionPlanCostActual: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanCostEstimate: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanIoReadTime: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanIoWriteTime: MetricConfig{
+			Enabled: true,
+		},
 		PostgresqlExecutionPlanParallelAware: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanPlanRows: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanPlanWidth: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanSharedHitBlocks: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanSharedReadBlocks: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanSharedWrittenBlocks: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanStartupTime: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanTempReadBlocks: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlExecutionPlanTempWrittenBlocks: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlIndexScans: MetricConfig{

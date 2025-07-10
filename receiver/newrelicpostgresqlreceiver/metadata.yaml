@@ -343,3 +343,88 @@ metrics:
     gauge:
       value_type: double
     attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  # Enhanced execution plan metrics for detailed query analysis
+  postgresql.execution_plan.cost_estimate:
+    enabled: true
+    description: Estimated cost of the execution plan node.
+    unit: "1"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.cost_actual:
+    enabled: true
+    description: Actual cost of the execution plan node.
+    unit: "1"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.startup_time:
+    enabled: true
+    description: Time taken to start the execution plan node in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.plan_rows:
+    enabled: true
+    description: Estimated number of rows to be processed by the execution plan node.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.plan_width:
+    enabled: true
+    description: Estimated width of rows to be processed by the execution plan node.
+    unit: "By"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.io_read_time:
+    enabled: true
+    description: Time spent reading blocks from disk in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.io_write_time:
+    enabled: true
+    description: Time spent writing blocks to disk in milliseconds.
+    unit: "ms"
+    gauge:
+      value_type: double
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.shared_hit_blocks:
+    enabled: true
+    description: Number of shared blocks hit from cache.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.shared_read_blocks:
+    enabled: true
+    description: Number of shared blocks read from disk.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.shared_written_blocks:
+    enabled: true
+    description: Number of shared blocks written to disk.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.temp_read_blocks:
+    enabled: true
+    description: Number of temporary blocks read from disk.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
+  postgresql.execution_plan.temp_written_blocks:
+    enabled: true
+    description: Number of temporary blocks written to disk.
+    unit: "1"
+    gauge:
+      value_type: int
+    attributes: [postgresql.database.name, postgresql.query.id, postgresql.node.type]
