@@ -3,7 +3,13 @@ all_set:
   metrics:
     postgresql.blocked.session.pid:
       enabled: true
+    postgresql.blocking.session.duration:
+      enabled: true
     postgresql.blocking.session.pid:
+      enabled: true
+    postgresql.blocking.session.wait_event:
+      enabled: true
+    postgresql.blocking.session.wait_event_type:
       enabled: true
     postgresql.blocks_hit:
       enabled: true
@@ -74,7 +80,13 @@ none_set:
   metrics:
     postgresql.blocked.session.pid:
       enabled: false
+    postgresql.blocking.session.duration:
+      enabled: false
     postgresql.blocking.session.pid:
+      enabled: false
+    postgresql.blocking.session.wait_event:
+      enabled: false
+    postgresql.blocking.session.wait_event_type:
       enabled: false
     postgresql.blocks_hit:
       enabled: false
