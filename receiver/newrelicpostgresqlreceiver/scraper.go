@@ -90,7 +90,7 @@ func newPostgreSQLScraper(
 	lb := metadata.NewLogsBuilder(settings)
 
 	// Create New Relic Query Performance Collector
-	nrQPC := NewNewRelicQueryPerformanceCollector(nil, mb, lb, &config.NewRelicQueryPerformance, nil)
+	nrQPC := NewNewRelicQueryPerformanceCollector(settings.Logger, mb, lb, &config.NewRelicQueryPerformance, nil)
 
 	return &postgreSQLScraper{
 		logger:               settings.Logger,
@@ -156,18 +156,8 @@ func (p *postgreSQLScraper) scrape(ctx context.Context) (pmetric.Metrics, error)
 			p.nrQPC.client = dbClient
 			
 			// Collect New Relic performance metrics
-			if err := p.nrQPC.collectSlowQueries(ctx, filteredDatabases); err != nil {
-				p.logger.Error("Failed to collect slow queries", zap.Error(err))
-				errs.add(err)
-			}
-			
-			if err := p.nrQPC.collectWaitEvents(ctx, filteredDatabases); err != nil {
-				p.logger.Error("Failed to collect wait events", zap.Error(err))
-				errs.add(err)
-			}
-			
-			if err := p.nrQPC.collectBlockingSessions(ctx, filteredDatabases); err != nil {
-				p.logger.Error("Failed to collect blocking sessions", zap.Error(err))
+			if err := p.nrQPC.CollectQueryPerformanceMetrics(ctx, filteredDatabases); err != nil {
+				p.logger.Error("Failed to collect New Relic performance metrics", zap.Error(err))
 				errs.add(err)
 			}
 			
