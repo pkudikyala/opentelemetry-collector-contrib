@@ -28,6 +28,7 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 
 // MetricsConfig provides config for newrelicpostgresql metrics.
 type MetricsConfig struct {
+	PostgresqlBackends                         MetricConfig `mapstructure:"postgresql.backends"`
 	PostgresqlBlockedSessionPid                MetricConfig `mapstructure:"postgresql.blocked.session.pid"`
 	PostgresqlBlockingSessionDuration          MetricConfig `mapstructure:"postgresql.blocking.session.duration"`
 	PostgresqlBlockingSessionPid               MetricConfig `mapstructure:"postgresql.blocking.session.pid"`
@@ -77,6 +78,9 @@ type MetricsConfig struct {
 
 func DefaultMetricsConfig() MetricsConfig {
 	return MetricsConfig{
+		PostgresqlBackends: MetricConfig{
+			Enabled: true,
+		},
 		PostgresqlBlockedSessionPid: MetricConfig{
 			Enabled: true,
 		},

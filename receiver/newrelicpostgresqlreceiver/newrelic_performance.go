@@ -154,7 +154,12 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 			pss.queryid AS query_id,
 			LEFT(pss.query, 4095) AS query_text,
 			pd.datname AS database_name,
-			current_schema() AS schema_name,
+			CASE 
+				-- If query contains schema-qualified names (schema.table), indicate mixed schemas
+				WHEN pss.query ~* '\w+\.\w+' THEN 'schema_qualified'
+				-- For unqualified table names, assume public schema (PostgreSQL default)
+				ELSE 'public'
+			END AS schema_name,
 			pss.calls AS execution_count,
 			ROUND((pss.total_exec_time / pss.calls)::numeric, 3) AS avg_elapsed_time_ms,
 			pss.shared_blks_read / pss.calls AS avg_disk_reads,
@@ -229,10 +234,10 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectSlowQueries(ctx context.C
 		nrqpc.slowQueryCache[slowQuery.QueryID] = &slowQuery
 
 		// Record metrics
-		nrqpc.mb.RecordPostgresqlQueryExecutionCountDataPoint(now, slowQuery.ExecutionCount, slowQuery.DatabaseName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
-		nrqpc.mb.RecordPostgresqlQueryAvgElapsedTimeDataPoint(now, slowQuery.AvgElapsedTimeMs, slowQuery.DatabaseName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
-		nrqpc.mb.RecordPostgresqlQueryAvgDiskReadsDataPoint(now, slowQuery.AvgDiskReads, slowQuery.DatabaseName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
-		nrqpc.mb.RecordPostgresqlQueryAvgDiskWritesDataPoint(now, slowQuery.AvgDiskWrites, slowQuery.DatabaseName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
+		nrqpc.mb.RecordPostgresqlQueryExecutionCountDataPoint(now, slowQuery.ExecutionCount, slowQuery.DatabaseName, slowQuery.SchemaName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
+		nrqpc.mb.RecordPostgresqlQueryAvgElapsedTimeDataPoint(now, slowQuery.AvgElapsedTimeMs, slowQuery.DatabaseName, slowQuery.SchemaName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
+		nrqpc.mb.RecordPostgresqlQueryAvgDiskReadsDataPoint(now, slowQuery.AvgDiskReads, slowQuery.DatabaseName, slowQuery.SchemaName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
+		nrqpc.mb.RecordPostgresqlQueryAvgDiskWritesDataPoint(now, slowQuery.AvgDiskWrites, slowQuery.DatabaseName, slowQuery.SchemaName, slowQuery.QueryID, slowQuery.QueryText, slowQuery.StatementType)
 
 		// Generate log entry for slow query
 		nrqpc.generateSlowQueryLog(slowQuery)
@@ -442,7 +447,7 @@ func (nrqpc *NewRelicQueryPerformanceCollector) collectIndividualQueries(ctx con
 		}
 
 		// Record individual query CPU time
-		nrqpc.mb.RecordPostgresqlQueryCPUTimeDataPoint(now, individualQuery.CPUTimeMs, individualQuery.DatabaseName, individualQuery.QueryID, individualQuery.QueryText)
+		nrqpc.mb.RecordPostgresqlQueryCPUTimeDataPoint(now, individualQuery.CPUTimeMs, individualQuery.DatabaseName, "", individualQuery.QueryID, individualQuery.QueryText)
 	}
 
 	return nil

@@ -70,6 +70,10 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
+			mb.RecordPostgresqlBackendsDataPoint(ts, 1)
+
+			defaultMetricsCount++
+			allMetricsCount++
 			mb.RecordPostgresqlBlockedSessionPidDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.text-val")
 
 			defaultMetricsCount++
@@ -198,23 +202,23 @@ func TestMetricsBuilder(t *testing.T) {
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordPostgresqlQueryAvgDiskReadsDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
+			mb.RecordPostgresqlQueryAvgDiskReadsDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.schema.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordPostgresqlQueryAvgDiskWritesDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
+			mb.RecordPostgresqlQueryAvgDiskWritesDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.schema.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordPostgresqlQueryAvgElapsedTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
+			mb.RecordPostgresqlQueryAvgElapsedTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.schema.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordPostgresqlQueryCPUTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.query.text-val")
+			mb.RecordPostgresqlQueryCPUTimeDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.schema.name-val", "postgresql.query.id-val", "postgresql.query.text-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
-			mb.RecordPostgresqlQueryExecutionCountDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
+			mb.RecordPostgresqlQueryExecutionCountDataPoint(ts, 1, "postgresql.database.name-val", "postgresql.schema.name-val", "postgresql.query.id-val", "postgresql.query.text-val", "postgresql.statement.type-val")
 
 			defaultMetricsCount++
 			allMetricsCount++
@@ -275,6 +279,20 @@ func TestMetricsBuilder(t *testing.T) {
 			validatedMetrics := make(map[string]bool)
 			for i := 0; i < ms.Len(); i++ {
 				switch ms.At(i).Name() {
+				case "postgresql.backends":
+					assert.False(t, validatedMetrics["postgresql.backends"], "Found a duplicate in the metrics slice: postgresql.backends")
+					validatedMetrics["postgresql.backends"] = true
+					assert.Equal(t, pmetric.MetricTypeSum, ms.At(i).Type())
+					assert.Equal(t, 1, ms.At(i).Sum().DataPoints().Len())
+					assert.Equal(t, "The number of backends.", ms.At(i).Description())
+					assert.Equal(t, "1", ms.At(i).Unit())
+					assert.False(t, ms.At(i).Sum().IsMonotonic())
+					assert.Equal(t, pmetric.AggregationTemporalityCumulative, ms.At(i).Sum().AggregationTemporality())
+					dp := ms.At(i).Sum().DataPoints().At(0)
+					assert.Equal(t, start, dp.StartTimestamp())
+					assert.Equal(t, ts, dp.Timestamp())
+					assert.Equal(t, pmetric.NumberDataPointValueTypeInt, dp.ValueType())
+					assert.Equal(t, int64(1), dp.IntValue())
 				case "postgresql.blocked.session.pid":
 					assert.False(t, validatedMetrics["postgresql.blocked.session.pid"], "Found a duplicate in the metrics slice: postgresql.blocked.session.pid")
 					validatedMetrics["postgresql.blocked.session.pid"] = true
@@ -946,6 +964,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.schema.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.schema.name-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
@@ -970,6 +991,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.schema.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.schema.name-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
@@ -994,6 +1018,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.schema.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.schema.name-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
@@ -1018,6 +1045,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.schema.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.schema.name-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())
@@ -1041,6 +1071,9 @@ func TestMetricsBuilder(t *testing.T) {
 					attrVal, ok := dp.Attributes().Get("postgresql.database.name")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.database.name-val", attrVal.Str())
+					attrVal, ok = dp.Attributes().Get("postgresql.schema.name")
+					assert.True(t, ok)
+					assert.Equal(t, "postgresql.schema.name-val", attrVal.Str())
 					attrVal, ok = dp.Attributes().Get("postgresql.query.id")
 					assert.True(t, ok)
 					assert.Equal(t, "postgresql.query.id-val", attrVal.Str())

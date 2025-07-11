@@ -123,6 +123,9 @@ var MapAttributeState = map[string]AttributeState{
 }
 
 var MetricsInfo = metricsInfo{
+	PostgresqlBackends: metricInfo{
+		Name: "postgresql.backends",
+	},
 	PostgresqlBlockedSessionPid: metricInfo{
 		Name: "postgresql.blocked.session.pid",
 	},
@@ -261,6 +264,7 @@ var MetricsInfo = metricsInfo{
 }
 
 type metricsInfo struct {
+	PostgresqlBackends                         metricInfo
 	PostgresqlBlockedSessionPid                metricInfo
 	PostgresqlBlockingSessionDuration          metricInfo
 	PostgresqlBlockingSessionPid               metricInfo
@@ -310,6 +314,57 @@ type metricsInfo struct {
 
 type metricInfo struct {
 	Name string
+}
+
+type metricPostgresqlBackends struct {
+	data     pmetric.Metric // data buffer for generated metric.
+	config   MetricConfig   // metric config provided by user.
+	capacity int            // max observed number of data points added to the metric.
+}
+
+// init fills postgresql.backends metric with initial data.
+func (m *metricPostgresqlBackends) init() {
+	m.data.SetName("postgresql.backends")
+	m.data.SetDescription("The number of backends.")
+	m.data.SetUnit("1")
+	m.data.SetEmptySum()
+	m.data.Sum().SetIsMonotonic(false)
+	m.data.Sum().SetAggregationTemporality(pmetric.AggregationTemporalityCumulative)
+}
+
+func (m *metricPostgresqlBackends) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64) {
+	if !m.config.Enabled {
+		return
+	}
+	dp := m.data.Sum().DataPoints().AppendEmpty()
+	dp.SetStartTimestamp(start)
+	dp.SetTimestamp(ts)
+	dp.SetIntValue(val)
+}
+
+// updateCapacity saves max length of data point slices that will be used for the slice capacity.
+func (m *metricPostgresqlBackends) updateCapacity() {
+	if m.data.Sum().DataPoints().Len() > m.capacity {
+		m.capacity = m.data.Sum().DataPoints().Len()
+	}
+}
+
+// emit appends recorded metric data to a metrics slice and prepares it for recording another set of data points.
+func (m *metricPostgresqlBackends) emit(metrics pmetric.MetricSlice) {
+	if m.config.Enabled && m.data.Sum().DataPoints().Len() > 0 {
+		m.updateCapacity()
+		m.data.MoveTo(metrics.AppendEmpty())
+		m.init()
+	}
+}
+
+func newMetricPostgresqlBackends(cfg MetricConfig) metricPostgresqlBackends {
+	m := metricPostgresqlBackends{config: cfg}
+	if cfg.Enabled {
+		m.data = pmetric.NewMetric()
+		m.init()
+	}
+	return m
 }
 
 type metricPostgresqlBlockedSessionPid struct {
@@ -2025,7 +2080,7 @@ func (m *metricPostgresqlQueryAvgDiskReads) init() {
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricPostgresqlQueryAvgDiskReads) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+func (m *metricPostgresqlQueryAvgDiskReads) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -2034,6 +2089,7 @@ func (m *metricPostgresqlQueryAvgDiskReads) recordDataPoint(start pcommon.Timest
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.schema.name", postgresqlSchemaNameAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.text", postgresqlQueryTextAttributeValue)
 	dp.Attributes().PutStr("postgresql.statement.type", postgresqlStatementTypeAttributeValue)
@@ -2079,7 +2135,7 @@ func (m *metricPostgresqlQueryAvgDiskWrites) init() {
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricPostgresqlQueryAvgDiskWrites) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+func (m *metricPostgresqlQueryAvgDiskWrites) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -2088,6 +2144,7 @@ func (m *metricPostgresqlQueryAvgDiskWrites) recordDataPoint(start pcommon.Times
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.schema.name", postgresqlSchemaNameAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.text", postgresqlQueryTextAttributeValue)
 	dp.Attributes().PutStr("postgresql.statement.type", postgresqlStatementTypeAttributeValue)
@@ -2133,7 +2190,7 @@ func (m *metricPostgresqlQueryAvgElapsedTime) init() {
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricPostgresqlQueryAvgElapsedTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+func (m *metricPostgresqlQueryAvgElapsedTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -2142,6 +2199,7 @@ func (m *metricPostgresqlQueryAvgElapsedTime) recordDataPoint(start pcommon.Time
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.schema.name", postgresqlSchemaNameAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.text", postgresqlQueryTextAttributeValue)
 	dp.Attributes().PutStr("postgresql.statement.type", postgresqlStatementTypeAttributeValue)
@@ -2187,7 +2245,7 @@ func (m *metricPostgresqlQueryCPUTime) init() {
 	m.data.Gauge().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricPostgresqlQueryCPUTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string) {
+func (m *metricPostgresqlQueryCPUTime) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -2196,6 +2254,7 @@ func (m *metricPostgresqlQueryCPUTime) recordDataPoint(start pcommon.Timestamp, 
 	dp.SetTimestamp(ts)
 	dp.SetDoubleValue(val)
 	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.schema.name", postgresqlSchemaNameAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.text", postgresqlQueryTextAttributeValue)
 }
@@ -2242,7 +2301,7 @@ func (m *metricPostgresqlQueryExecutionCount) init() {
 	m.data.Sum().DataPoints().EnsureCapacity(m.capacity)
 }
 
-func (m *metricPostgresqlQueryExecutionCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+func (m *metricPostgresqlQueryExecutionCount) recordDataPoint(start pcommon.Timestamp, ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
 	if !m.config.Enabled {
 		return
 	}
@@ -2251,6 +2310,7 @@ func (m *metricPostgresqlQueryExecutionCount) recordDataPoint(start pcommon.Time
 	dp.SetTimestamp(ts)
 	dp.SetIntValue(val)
 	dp.Attributes().PutStr("postgresql.database.name", postgresqlDatabaseNameAttributeValue)
+	dp.Attributes().PutStr("postgresql.schema.name", postgresqlSchemaNameAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.id", postgresqlQueryIDAttributeValue)
 	dp.Attributes().PutStr("postgresql.query.text", postgresqlQueryTextAttributeValue)
 	dp.Attributes().PutStr("postgresql.statement.type", postgresqlStatementTypeAttributeValue)
@@ -2717,6 +2777,7 @@ type MetricsBuilder struct {
 	buildInfo                                        component.BuildInfo  // contains version information.
 	resourceAttributeIncludeFilter                   map[string]filter.Filter
 	resourceAttributeExcludeFilter                   map[string]filter.Filter
+	metricPostgresqlBackends                         metricPostgresqlBackends
 	metricPostgresqlBlockedSessionPid                metricPostgresqlBlockedSessionPid
 	metricPostgresqlBlockingSessionDuration          metricPostgresqlBlockingSessionDuration
 	metricPostgresqlBlockingSessionPid               metricPostgresqlBlockingSessionPid
@@ -2787,6 +2848,7 @@ func NewMetricsBuilder(mbc MetricsBuilderConfig, settings receiver.Settings, opt
 		startTime:                                        pcommon.NewTimestampFromTime(time.Now()),
 		metricsBuffer:                                    pmetric.NewMetrics(),
 		buildInfo:                                        settings.BuildInfo,
+		metricPostgresqlBackends:                         newMetricPostgresqlBackends(mbc.Metrics.PostgresqlBackends),
 		metricPostgresqlBlockedSessionPid:                newMetricPostgresqlBlockedSessionPid(mbc.Metrics.PostgresqlBlockedSessionPid),
 		metricPostgresqlBlockingSessionDuration:          newMetricPostgresqlBlockingSessionDuration(mbc.Metrics.PostgresqlBlockingSessionDuration),
 		metricPostgresqlBlockingSessionPid:               newMetricPostgresqlBlockingSessionPid(mbc.Metrics.PostgresqlBlockingSessionPid),
@@ -2928,6 +2990,7 @@ func (mb *MetricsBuilder) EmitForResource(options ...ResourceMetricsOption) {
 	ils.Scope().SetName(ScopeName)
 	ils.Scope().SetVersion(mb.buildInfo.Version)
 	ils.Metrics().EnsureCapacity(mb.metricsCapacity)
+	mb.metricPostgresqlBackends.emit(ils.Metrics())
 	mb.metricPostgresqlBlockedSessionPid.emit(ils.Metrics())
 	mb.metricPostgresqlBlockingSessionDuration.emit(ils.Metrics())
 	mb.metricPostgresqlBlockingSessionPid.emit(ils.Metrics())
@@ -3002,6 +3065,11 @@ func (mb *MetricsBuilder) Emit(options ...ResourceMetricsOption) pmetric.Metrics
 	metrics := mb.metricsBuffer
 	mb.metricsBuffer = pmetric.NewMetrics()
 	return metrics
+}
+
+// RecordPostgresqlBackendsDataPoint adds a data point to postgresql.backends metric.
+func (mb *MetricsBuilder) RecordPostgresqlBackendsDataPoint(ts pcommon.Timestamp, val int64) {
+	mb.metricPostgresqlBackends.recordDataPoint(mb.startTime, ts, val)
 }
 
 // RecordPostgresqlBlockedSessionPidDataPoint adds a data point to postgresql.blocked.session.pid metric.
@@ -3165,28 +3233,28 @@ func (mb *MetricsBuilder) RecordPostgresqlOperationsDataPoint(ts pcommon.Timesta
 }
 
 // RecordPostgresqlQueryAvgDiskReadsDataPoint adds a data point to postgresql.query.avg_disk_reads metric.
-func (mb *MetricsBuilder) RecordPostgresqlQueryAvgDiskReadsDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
-	mb.metricPostgresqlQueryAvgDiskReads.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
+func (mb *MetricsBuilder) RecordPostgresqlQueryAvgDiskReadsDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+	mb.metricPostgresqlQueryAvgDiskReads.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlSchemaNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
 }
 
 // RecordPostgresqlQueryAvgDiskWritesDataPoint adds a data point to postgresql.query.avg_disk_writes metric.
-func (mb *MetricsBuilder) RecordPostgresqlQueryAvgDiskWritesDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
-	mb.metricPostgresqlQueryAvgDiskWrites.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
+func (mb *MetricsBuilder) RecordPostgresqlQueryAvgDiskWritesDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+	mb.metricPostgresqlQueryAvgDiskWrites.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlSchemaNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
 }
 
 // RecordPostgresqlQueryAvgElapsedTimeDataPoint adds a data point to postgresql.query.avg_elapsed_time metric.
-func (mb *MetricsBuilder) RecordPostgresqlQueryAvgElapsedTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
-	mb.metricPostgresqlQueryAvgElapsedTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
+func (mb *MetricsBuilder) RecordPostgresqlQueryAvgElapsedTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+	mb.metricPostgresqlQueryAvgElapsedTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlSchemaNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
 }
 
 // RecordPostgresqlQueryCPUTimeDataPoint adds a data point to postgresql.query.cpu_time metric.
-func (mb *MetricsBuilder) RecordPostgresqlQueryCPUTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string) {
-	mb.metricPostgresqlQueryCPUTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue)
+func (mb *MetricsBuilder) RecordPostgresqlQueryCPUTimeDataPoint(ts pcommon.Timestamp, val float64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string) {
+	mb.metricPostgresqlQueryCPUTime.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlSchemaNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue)
 }
 
 // RecordPostgresqlQueryExecutionCountDataPoint adds a data point to postgresql.query.execution.count metric.
-func (mb *MetricsBuilder) RecordPostgresqlQueryExecutionCountDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
-	mb.metricPostgresqlQueryExecutionCount.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
+func (mb *MetricsBuilder) RecordPostgresqlQueryExecutionCountDataPoint(ts pcommon.Timestamp, val int64, postgresqlDatabaseNameAttributeValue string, postgresqlSchemaNameAttributeValue string, postgresqlQueryIDAttributeValue string, postgresqlQueryTextAttributeValue string, postgresqlStatementTypeAttributeValue string) {
+	mb.metricPostgresqlQueryExecutionCount.recordDataPoint(mb.startTime, ts, val, postgresqlDatabaseNameAttributeValue, postgresqlSchemaNameAttributeValue, postgresqlQueryIDAttributeValue, postgresqlQueryTextAttributeValue, postgresqlStatementTypeAttributeValue)
 }
 
 // RecordPostgresqlRollbacksDataPoint adds a data point to postgresql.rollbacks metric.

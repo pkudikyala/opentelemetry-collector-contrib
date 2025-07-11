@@ -94,6 +94,14 @@ attributes:
     enum: [dead, live]
 
 metrics:
+  postgresql.backends:
+    enabled: true
+    description: The number of backends.
+    unit: "1"
+    sum:
+      value_type: int
+      monotonic: false
+      aggregation_temporality: cumulative
   postgresql.blocks_read:
     enabled: true
     description: The number of blocks read.
@@ -237,35 +245,35 @@ metrics:
       value_type: int
       monotonic: true
       aggregation_temporality: cumulative
-    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
   postgresql.query.avg_elapsed_time:
     enabled: true
     description: Average execution time for the query in milliseconds.
     unit: "ms"
     gauge:
       value_type: double
-    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
   postgresql.query.avg_disk_reads:
     enabled: true
     description: Average number of disk reads per query execution.
     unit: "1"
     gauge:
       value_type: double
-    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
   postgresql.query.avg_disk_writes:
     enabled: true
     description: Average number of disk writes per query execution.
     unit: "1"
     gauge:
       value_type: double
-    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.query.id, postgresql.query.text, postgresql.statement.type]
   postgresql.query.cpu_time:
     enabled: true
     description: CPU time consumed by the query in milliseconds.
     unit: "ms"
     gauge:
       value_type: double
-    attributes: [postgresql.database.name, postgresql.query.id, postgresql.query.text]
+    attributes: [postgresql.database.name, postgresql.schema.name, postgresql.query.id, postgresql.query.text]
   postgresql.wait.event.total_time:
     enabled: true
     description: Total wait time for the wait event in milliseconds.

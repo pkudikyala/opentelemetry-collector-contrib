@@ -1,6 +1,8 @@
 default:
 all_set:
   metrics:
+    postgresql.backends:
+      enabled: true
     postgresql.blocked.session.pid:
       enabled: true
     postgresql.blocking.session.duration:
@@ -102,6 +104,8 @@ all_set:
       enabled: true
 none_set:
   metrics:
+    postgresql.backends:
+      enabled: false
     postgresql.blocked.session.pid:
       enabled: false
     postgresql.blocking.session.duration:

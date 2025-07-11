@@ -27,6 +27,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 			name: "all_set",
 			want: MetricsBuilderConfig{
 				Metrics: MetricsConfig{
+					PostgresqlBackends:                         MetricConfig{Enabled: true},
 					PostgresqlBlockedSessionPid:                MetricConfig{Enabled: true},
 					PostgresqlBlockingSessionDuration:          MetricConfig{Enabled: true},
 					PostgresqlBlockingSessionPid:               MetricConfig{Enabled: true},
@@ -85,6 +86,7 @@ func TestMetricsBuilderConfig(t *testing.T) {
 			name: "none_set",
 			want: MetricsBuilderConfig{
 				Metrics: MetricsConfig{
+					PostgresqlBackends:                         MetricConfig{Enabled: false},
 					PostgresqlBlockedSessionPid:                MetricConfig{Enabled: false},
 					PostgresqlBlockingSessionDuration:          MetricConfig{Enabled: false},
 					PostgresqlBlockingSessionPid:               MetricConfig{Enabled: false},

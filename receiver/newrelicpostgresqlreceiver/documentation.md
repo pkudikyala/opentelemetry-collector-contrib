@@ -12,6 +12,14 @@ metrics:
     enabled: false
 ```
 
+### postgresql.backends
+
+The number of backends.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | false |
+
 ### postgresql.blocked.session.pid
 
 Process ID of the blocked session.
@@ -517,6 +525,7 @@ Average number of disk reads per query execution.
 | Name | Description | Values | Optional |
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 | postgresql.statement.type | The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.). | Any Str | false |
@@ -534,6 +543,7 @@ Average number of disk writes per query execution.
 | Name | Description | Values | Optional |
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 | postgresql.statement.type | The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.). | Any Str | false |
@@ -551,6 +561,7 @@ Average execution time for the query in milliseconds.
 | Name | Description | Values | Optional |
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 | postgresql.statement.type | The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.). | Any Str | false |
@@ -568,6 +579,7 @@ CPU time consumed by the query in milliseconds.
 | Name | Description | Values | Optional |
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 
@@ -584,6 +596,7 @@ Number of times the query was executed.
 | Name | Description | Values | Optional |
 | ---- | ----------- | ------ | -------- |
 | postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.query.id | The unique identifier for the query. | Any Str | false |
 | postgresql.query.text | The SQL query text. | Any Str | false |
 | postgresql.statement.type | The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.). | Any Str | false |

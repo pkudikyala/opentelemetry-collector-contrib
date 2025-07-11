@@ -204,6 +204,7 @@ func (p *postgreSQLScraper) collectBasicMetrics(ctx context.Context, database st
 
 	if connectionCount, exists := backends[databaseName(database)]; exists {
 		p.mb.RecordPostgresqlConnectionCountDataPoint(now, connectionCount, database)
+		p.mb.RecordPostgresqlBackendsDataPoint(now, connectionCount)
 	}
 
 	// Collect max connections (only needs to be done once, not per database)
