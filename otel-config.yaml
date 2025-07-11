@@ -1,0 +1,36 @@
+receivers:
+  newrelicpostgresql:
+    endpoint: localhost:5432
+    transport: tcp
+    username: postgres
+    password: postgres
+    databases:
+      - testdb
+    collection_interval: 10s
+    newrelic_query_performance:
+      enabled: true
+      slow_query_threshold_ms: 100  # Low threshold to capture queries
+      max_queries_per_collection: 100
+      query_monitoring_enabled: true
+
+processors:
+  batch:
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8889"
+  debug:
+    verbosity: detailed
+
+service:
+  telemetry:
+    logs:
+      level: debug
+    metrics:
+      level: detailed
+  
+  pipelines:
+    metrics:
+      receivers: [newrelicpostgresql]
+      processors: [batch]
+      exporters: [prometheus, debug]
