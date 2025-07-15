@@ -3,6 +3,20 @@ all_set:
   metrics:
     postgresql.backends:
       enabled: true
+    postgresql.bgwriter.buffers.allocated:
+      enabled: true
+    postgresql.bgwriter.buffers.writes:
+      enabled: true
+    postgresql.bgwriter.checkpoint.count:
+      enabled: true
+    postgresql.bgwriter.duration:
+      enabled: true
+    postgresql.bgwriter.maxwritten:
+      enabled: true
+    postgresql.blks_hit:
+      enabled: true
+    postgresql.blks_read:
+      enabled: true
     postgresql.blocked.session.pid:
       enabled: true
     postgresql.blocking.session.duration:
@@ -26,6 +40,10 @@ all_set:
     postgresql.database.count:
       enabled: true
     postgresql.database.locks:
+      enabled: true
+    postgresql.db_size:
+      enabled: true
+    postgresql.deadlocks:
       enabled: true
     postgresql.execution_plan.actual_loops:
       enabled: true
@@ -77,9 +95,15 @@ all_set:
       enabled: true
     postgresql.query.execution.count:
       enabled: true
+    postgresql.replication.data_delay:
+      enabled: true
     postgresql.rollbacks:
       enabled: true
     postgresql.rows:
+      enabled: true
+    postgresql.sequential_scans:
+      enabled: true
+    postgresql.table.count:
       enabled: true
     postgresql.table.scans:
       enabled: true
@@ -87,9 +111,23 @@ all_set:
       enabled: true
     postgresql.table.vacuum.count:
       enabled: true
+    postgresql.temp_files:
+      enabled: true
+    postgresql.tup_deleted:
+      enabled: true
+    postgresql.tup_fetched:
+      enabled: true
+    postgresql.tup_inserted:
+      enabled: true
+    postgresql.tup_returned:
+      enabled: true
+    postgresql.tup_updated:
+      enabled: true
     postgresql.wait.event.total_time:
       enabled: true
     postgresql.wal.age:
+      enabled: true
+    postgresql.wal.delay:
       enabled: true
     postgresql.wal.lag:
       enabled: true
@@ -106,6 +144,20 @@ none_set:
   metrics:
     postgresql.backends:
       enabled: false
+    postgresql.bgwriter.buffers.allocated:
+      enabled: false
+    postgresql.bgwriter.buffers.writes:
+      enabled: false
+    postgresql.bgwriter.checkpoint.count:
+      enabled: false
+    postgresql.bgwriter.duration:
+      enabled: false
+    postgresql.bgwriter.maxwritten:
+      enabled: false
+    postgresql.blks_hit:
+      enabled: false
+    postgresql.blks_read:
+      enabled: false
     postgresql.blocked.session.pid:
       enabled: false
     postgresql.blocking.session.duration:
@@ -129,6 +181,10 @@ none_set:
     postgresql.database.count:
       enabled: false
     postgresql.database.locks:
+      enabled: false
+    postgresql.db_size:
+      enabled: false
+    postgresql.deadlocks:
       enabled: false
     postgresql.execution_plan.actual_loops:
       enabled: false
@@ -180,9 +236,15 @@ none_set:
       enabled: false
     postgresql.query.execution.count:
       enabled: false
+    postgresql.replication.data_delay:
+      enabled: false
     postgresql.rollbacks:
       enabled: false
     postgresql.rows:
+      enabled: false
+    postgresql.sequential_scans:
+      enabled: false
+    postgresql.table.count:
       enabled: false
     postgresql.table.scans:
       enabled: false
@@ -190,9 +252,23 @@ none_set:
       enabled: false
     postgresql.table.vacuum.count:
       enabled: false
+    postgresql.temp_files:
+      enabled: false
+    postgresql.tup_deleted:
+      enabled: false
+    postgresql.tup_fetched:
+      enabled: false
+    postgresql.tup_inserted:
+      enabled: false
+    postgresql.tup_returned:
+      enabled: false
+    postgresql.tup_updated:
+      enabled: false
     postgresql.wait.event.total_time:
       enabled: false
     postgresql.wal.age:
+      enabled: false
+    postgresql.wal.delay:
       enabled: false
     postgresql.wal.lag:
       enabled: false

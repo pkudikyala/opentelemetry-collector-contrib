@@ -20,6 +20,92 @@ The number of backends.
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | 1 | Sum | Int | Cumulative | false |
 
+### postgresql.bgwriter.buffers.allocated
+
+Number of buffers allocated.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {buffers} | Sum | Int | Cumulative | true |
+
+### postgresql.bgwriter.buffers.writes
+
+Number of buffers written.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {buffers} | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| source | The source of a buffer write. | Str: ``backend``, ``backend_fsync``, ``checkpoints``, ``bgwriter`` | false |
+
+### postgresql.bgwriter.checkpoint.count
+
+The number of checkpoints performed.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| {checkpoints} | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| type | The type of checkpoint state. | Str: ``requested``, ``scheduled`` | false |
+
+### postgresql.bgwriter.duration
+
+Total time spent writing and syncing files to disk by checkpoints.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| ms | Sum | Double | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| type | The type of time spent during the checkpoint. | Str: ``sync``, ``write`` | false |
+
+### postgresql.bgwriter.maxwritten
+
+Number of times the background writer stopped a cleaning scan because it had written too many buffers.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+### postgresql.blks_hit
+
+Number of times disk blocks were found already in the buffer cache.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.blks_read
+
+Number of disk blocks read in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
 ### postgresql.blocked.session.pid
 
 Process ID of the blocked session.
@@ -183,6 +269,34 @@ The number of database locks.
 | Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
 | ---- | ----------- | ---------- | ----------------------- | --------- |
 | 1 | Sum | Int | Unspecified | false |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.db_size
+
+The database disk usage.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| By | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.deadlocks
+
+Number of deadlocks detected in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
 
 #### Attributes
 
@@ -601,6 +715,20 @@ Number of times the query was executed.
 | postgresql.query.text | The SQL query text. | Any Str | false |
 | postgresql.statement.type | The type of SQL statement (SELECT, INSERT, UPDATE, DELETE, etc.). | Any Str | false |
 
+### postgresql.replication.data_delay
+
+The amount of data delayed in replication.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| By | Gauge | Int |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| replication_client | The IP address of the client connected to this backend. If this field is "unix", it indicates either that the client is connected via a Unix socket. | Any Str | false |
+
 ### postgresql.rollbacks
 
 The number of rollbacks.
@@ -630,6 +758,36 @@ The number of rows.
 | postgresql.database.name | The name of the database. | Any Str | false |
 | postgresql.table.name | The table name. | Any Str | false |
 | state | The tuple (row) state. | Str: ``dead``, ``live`` | false |
+
+### postgresql.sequential_scans
+
+Number of sequential scans initiated on this table.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+| postgresql.schema.name | The schema name. | Any Str | false |
+| postgresql.table.name | The table name. | Any Str | false |
+
+### postgresql.table.count
+
+Number of user tables in a database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | false |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
 
 ### postgresql.table.scans
 
@@ -679,6 +837,90 @@ Number of times a table has been manually vacuumed.
 | postgresql.schema.name | The schema name. | Any Str | false |
 | postgresql.table.name | The table name. | Any Str | false |
 
+### postgresql.temp_files
+
+Number of temporary files created by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.tup_deleted
+
+Number of rows deleted by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.tup_fetched
+
+Number of rows fetched by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.tup_inserted
+
+Number of rows inserted by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.tup_returned
+
+Number of rows returned by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
+### postgresql.tup_updated
+
+Number of rows updated by queries in this database.
+
+| Unit | Metric Type | Value Type | Aggregation Temporality | Monotonic |
+| ---- | ----------- | ---------- | ----------------------- | --------- |
+| 1 | Sum | Int | Cumulative | true |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| postgresql.database.name | The name of the database. | Any Str | false |
+
 ### postgresql.wait.event.total_time
 
 Total wait time for the wait event in milliseconds.
@@ -704,6 +946,20 @@ Age of the oldest WAL file.
 | Unit | Metric Type | Value Type |
 | ---- | ----------- | ---------- |
 | s | Gauge | Int |
+
+### postgresql.wal.delay
+
+Time between flushing recent WAL locally and receiving notification that the standby server has completed an operation with it.
+
+| Unit | Metric Type | Value Type |
+| ---- | ----------- | ---------- |
+| s | Gauge | Double |
+
+#### Attributes
+
+| Name | Description | Values | Optional |
+| ---- | ----------- | ------ | -------- |
+| replication_client | The IP address of the client connected to this backend. If this field is "unix", it indicates either that the client is connected via a Unix socket. | Any Str | false |
 
 ### postgresql.wal.lag
 

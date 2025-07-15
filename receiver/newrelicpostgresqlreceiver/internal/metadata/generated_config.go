@@ -29,6 +29,13 @@ func (ms *MetricConfig) Unmarshal(parser *confmap.Conf) error {
 // MetricsConfig provides config for newrelicpostgresql metrics.
 type MetricsConfig struct {
 	PostgresqlBackends                         MetricConfig `mapstructure:"postgresql.backends"`
+	PostgresqlBgwriterBuffersAllocated         MetricConfig `mapstructure:"postgresql.bgwriter.buffers.allocated"`
+	PostgresqlBgwriterBuffersWrites            MetricConfig `mapstructure:"postgresql.bgwriter.buffers.writes"`
+	PostgresqlBgwriterCheckpointCount          MetricConfig `mapstructure:"postgresql.bgwriter.checkpoint.count"`
+	PostgresqlBgwriterDuration                 MetricConfig `mapstructure:"postgresql.bgwriter.duration"`
+	PostgresqlBgwriterMaxwritten               MetricConfig `mapstructure:"postgresql.bgwriter.maxwritten"`
+	PostgresqlBlksHit                          MetricConfig `mapstructure:"postgresql.blks_hit"`
+	PostgresqlBlksRead                         MetricConfig `mapstructure:"postgresql.blks_read"`
 	PostgresqlBlockedSessionPid                MetricConfig `mapstructure:"postgresql.blocked.session.pid"`
 	PostgresqlBlockingSessionDuration          MetricConfig `mapstructure:"postgresql.blocking.session.duration"`
 	PostgresqlBlockingSessionPid               MetricConfig `mapstructure:"postgresql.blocking.session.pid"`
@@ -41,6 +48,8 @@ type MetricsConfig struct {
 	PostgresqlConnectionMax                    MetricConfig `mapstructure:"postgresql.connection.max"`
 	PostgresqlDatabaseCount                    MetricConfig `mapstructure:"postgresql.database.count"`
 	PostgresqlDatabaseLocks                    MetricConfig `mapstructure:"postgresql.database.locks"`
+	PostgresqlDbSize                           MetricConfig `mapstructure:"postgresql.db_size"`
+	PostgresqlDeadlocks                        MetricConfig `mapstructure:"postgresql.deadlocks"`
 	PostgresqlExecutionPlanActualLoops         MetricConfig `mapstructure:"postgresql.execution_plan.actual_loops"`
 	PostgresqlExecutionPlanActualRows          MetricConfig `mapstructure:"postgresql.execution_plan.actual_rows"`
 	PostgresqlExecutionPlanActualTotalTime     MetricConfig `mapstructure:"postgresql.execution_plan.actual_total_time"`
@@ -66,19 +75,50 @@ type MetricsConfig struct {
 	PostgresqlQueryAvgElapsedTime              MetricConfig `mapstructure:"postgresql.query.avg_elapsed_time"`
 	PostgresqlQueryCPUTime                     MetricConfig `mapstructure:"postgresql.query.cpu_time"`
 	PostgresqlQueryExecutionCount              MetricConfig `mapstructure:"postgresql.query.execution.count"`
+	PostgresqlReplicationDataDelay             MetricConfig `mapstructure:"postgresql.replication.data_delay"`
 	PostgresqlRollbacks                        MetricConfig `mapstructure:"postgresql.rollbacks"`
 	PostgresqlRows                             MetricConfig `mapstructure:"postgresql.rows"`
+	PostgresqlSequentialScans                  MetricConfig `mapstructure:"postgresql.sequential_scans"`
+	PostgresqlTableCount                       MetricConfig `mapstructure:"postgresql.table.count"`
 	PostgresqlTableScans                       MetricConfig `mapstructure:"postgresql.table.scans"`
 	PostgresqlTableSize                        MetricConfig `mapstructure:"postgresql.table.size"`
 	PostgresqlTableVacuumCount                 MetricConfig `mapstructure:"postgresql.table.vacuum.count"`
+	PostgresqlTempFiles                        MetricConfig `mapstructure:"postgresql.temp_files"`
+	PostgresqlTupDeleted                       MetricConfig `mapstructure:"postgresql.tup_deleted"`
+	PostgresqlTupFetched                       MetricConfig `mapstructure:"postgresql.tup_fetched"`
+	PostgresqlTupInserted                      MetricConfig `mapstructure:"postgresql.tup_inserted"`
+	PostgresqlTupReturned                      MetricConfig `mapstructure:"postgresql.tup_returned"`
+	PostgresqlTupUpdated                       MetricConfig `mapstructure:"postgresql.tup_updated"`
 	PostgresqlWaitEventTotalTime               MetricConfig `mapstructure:"postgresql.wait.event.total_time"`
 	PostgresqlWalAge                           MetricConfig `mapstructure:"postgresql.wal.age"`
+	PostgresqlWalDelay                         MetricConfig `mapstructure:"postgresql.wal.delay"`
 	PostgresqlWalLag                           MetricConfig `mapstructure:"postgresql.wal.lag"`
 }
 
 func DefaultMetricsConfig() MetricsConfig {
 	return MetricsConfig{
 		PostgresqlBackends: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBgwriterBuffersAllocated: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBgwriterBuffersWrites: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBgwriterCheckpointCount: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBgwriterDuration: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBgwriterMaxwritten: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBlksHit: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlBlksRead: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlBlockedSessionPid: MetricConfig{
@@ -115,6 +155,12 @@ func DefaultMetricsConfig() MetricsConfig {
 			Enabled: true,
 		},
 		PostgresqlDatabaseLocks: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlDbSize: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlDeadlocks: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlExecutionPlanActualLoops: MetricConfig{
@@ -192,10 +238,19 @@ func DefaultMetricsConfig() MetricsConfig {
 		PostgresqlQueryExecutionCount: MetricConfig{
 			Enabled: true,
 		},
+		PostgresqlReplicationDataDelay: MetricConfig{
+			Enabled: true,
+		},
 		PostgresqlRollbacks: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlRows: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlSequentialScans: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTableCount: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlTableScans: MetricConfig{
@@ -207,10 +262,31 @@ func DefaultMetricsConfig() MetricsConfig {
 		PostgresqlTableVacuumCount: MetricConfig{
 			Enabled: true,
 		},
+		PostgresqlTempFiles: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTupDeleted: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTupFetched: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTupInserted: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTupReturned: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlTupUpdated: MetricConfig{
+			Enabled: true,
+		},
 		PostgresqlWaitEventTotalTime: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlWalAge: MetricConfig{
+			Enabled: true,
+		},
+		PostgresqlWalDelay: MetricConfig{
 			Enabled: true,
 		},
 		PostgresqlWalLag: MetricConfig{
