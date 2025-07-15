@@ -1,0 +1,36 @@
+receivers:
+  newrelicpostgresql:
+    endpoint: localhost:5432
+    transport: tcp
+    username: ${env:POSTGRES_USER}
+    password: ${env:POSTGRES_PASSWORD}
+    databases: ["testdb", "postgres"]
+    slow_query_threshold: 1ms  # Very low threshold to capture queries
+    execution_plan_enabled: true
+    collection_interval: 15s
+    timeout: 10s
+    tls:
+      insecure: true
+
+exporters:
+  prometheus:
+    endpoint: "0.0.0.0:8080"
+  logging:
+    loglevel: info
+
+processors:
+  batch:
+
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [newrelicpostgresql]
+      processors: [batch]
+      exporters: [prometheus, logging]
+    logs:
+      receivers: [newrelicpostgresql]
+      processors: [batch]
+      exporters: [logging]
