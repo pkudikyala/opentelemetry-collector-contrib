@@ -321,6 +321,11 @@ func (p *postgreSQLScraper) collectWalAge(
 ) {
 	walAge, err := client.getLatestWalAgeSeconds(ctx)
 	if err != nil {
+		// Check if this is the "no last archive" error, which is common when archiving is not configured
+		if strings.Contains(err.Error(), "no last archive found") {
+			p.logger.Debug("WAL archiving not configured, skipping WAL age metric", zap.Error(err))
+			return
+		}
 		errs.add(err)
 		return
 	}
