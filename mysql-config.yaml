@@ -1,0 +1,92 @@
+receivers:
+  postgresql:
+    endpoint: localhost:5432
+    transport: tcp
+    username: postgres
+    password: postgres
+    databases:
+      - postgres
+    collection_interval: 10s
+    tls:
+      insecure: true
+    # Explicitly enable WAL and replication metrics
+    metrics:
+      postgresql.wal.age:
+        enabled: true
+      postgresql.wal.lag:
+        enabled: true
+      postgresql.replication.data_delay:
+        enabled: true  
+      # Enable optional metrics that are disabled by default
+      postgresql.blks_hit:
+        enabled: true
+      postgresql.blks_read:
+        enabled: true
+      postgresql.database.locks:
+        enabled: true
+      postgresql.deadlocks:
+        enabled: true
+      postgresql.sequential_scans:
+        enabled: true
+      postgresql.temp_files:
+        enabled: true
+      postgresql.tup_deleted:
+        enabled: true
+      postgresql.tup_fetched:
+        enabled: true
+      postgresql.tup_inserted:
+        enabled: true
+      postgresql.tup_returned:
+        enabled: true
+      postgresql.tup_updated:
+        enabled: true
+      postgresql.wal.delay:
+        enabled: true
+    top_query_collection:
+      enabled: true
+      max_rows_per_query: 1000
+      top_n_query: 50
+      max_explain_each_interval: 100
+      query_plan_cache_size: 1000
+      query_plan_cache_ttl: 1h
+    query_sample_collection:
+      enabled: true
+      max_rows_per_query: 1000
+processors:
+  batch:
+
+  attributes:
+    actions:
+      - key: postgresql.endpoint
+        value: "localhost:5432"
+        action: insert
+
+exporters:
+  debug:
+    verbosity: detailed
+  # Export all metrics to a single file for debugging
+  file:
+    path: ./postgresql-only-metrics.json
+    
+  # prometheus:
+  #   endpoint: 0.0.0.0:9465
+    
+  # New Relic OTLP exporter
+  otlp/newrelic:
+    endpoint: https://staging-otlp.nr-data.net:4318
+    headers:
+      api-key: 70ec4a667dcec4070c9c881064645d30FFFFNRAL
+    compression: gzip
+service:
+  telemetry:
+    logs:
+      level: debug
+  pipelines:
+    metrics:
+      receivers: [postgresql]
+      processors: [ attributes, batch]
+      exporters: [debug, file, otlp/newrelic]
+    logs:
+      receivers: [postgresql]
+      processors: [ attributes, batch]
+      exporters: [debug, file, otlp/newrelic]

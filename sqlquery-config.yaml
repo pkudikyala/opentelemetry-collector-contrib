@@ -1,0 +1,287 @@
+receivers:
+  # Database 1: testdb
+  sqlquery/testdb:
+    collection_interval: 10s
+    driver: postgres
+    datasource: "host=localhost port=5432 user=postgres password=postgres sslmode=disable dbname=testdb"
+    queries:
+      # ...existing code...
+      - sql: |
+          SELECT 'newrelic' as newrelic,
+                 pss.queryid AS query_id,
+                 LEFT(pss.query, 4095) AS query_text,
+                 pd.datname AS database_name,
+                 current_schema() AS schema_name,
+                 pss.calls AS execution_count,
+                 ROUND((pss.total_exec_time / pss.calls)::numeric, 3) AS avg_elapsed_time_ms,
+                 pss.shared_blks_read / pss.calls AS avg_disk_reads,
+                 pss.shared_blks_written / pss.calls AS avg_disk_writes,
+                 1 AS metric_counter, -- Dummy metric value
+                 CASE
+                     WHEN pss.query ILIKE 'SELECT%%' THEN 'SELECT'
+                     WHEN pss.query ILIKE 'INSERT%%' THEN 'INSERT'
+                     WHEN pss.query ILIKE 'UPDATE%%' THEN 'UPDATE'
+                     WHEN pss.query ILIKE 'DELETE%%' THEN 'DELETE'
+                     ELSE 'OTHER'
+                 END AS statement_type,
+                 to_char(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS collection_timestamp
+          FROM pg_stat_statements pss
+          JOIN pg_database pd ON pss.dbid = pd.oid
+          WHERE pd.datname = current_database()
+            AND pss.query NOT ILIKE 'EXPLAIN (FORMAT JSON)%%'
+            AND pss.query NOT ILIKE 'SELECT $1 as newrelic%%'
+            AND pss.query NOT ILIKE 'WITH wait_history AS%%'
+            AND pss.query NOT ILIKE 'select -- BLOATQUERY%%'
+            AND pss.query NOT ILIKE 'select -- INDEXQUERY%%'
+            AND pss.query NOT ILIKE 'SELECT -- TABLEQUERY%%'
+            AND pss.query NOT ILIKE 'SELECT table_schema%%'
+            AND pss.calls > 0
+            AND (pss.total_exec_time / pss.calls) >= 1000  -- Only queries 1 second or slower
+          ORDER BY avg_elapsed_time_ms DESC
+          LIMIT 50
+        metrics:
+          - metric_name: postgres.slow_query.metrics
+            value_column: "metric_counter"
+            attribute_columns: ["query_id", "query_text", "database_name", "schema_name", "statement_type", "collection_timestamp", "execution_count", "avg_elapsed_time_ms", "avg_disk_reads", "avg_disk_writes"]
+            data_type: gauge
+            value_type: int
+      
+      # Wait events from pg_stat_activity
+      - sql: |
+          SELECT
+              COALESCE(sa.wait_event_type || ':' || sa.wait_event, 'CPU:active') AS wait_event_name,
+              CASE
+                  WHEN sa.wait_event_type IN ('LWLock', 'Lock') THEN 'Locks'
+                  WHEN sa.wait_event_type = 'IO' THEN 'Disk IO'
+                  WHEN sa.wait_event_type = 'CPU' THEN 'CPU'
+                  ELSE 'Other'
+              END AS wait_category,
+              CASE 
+                  WHEN sa.state = 'active' AND sa.query_start IS NOT NULL THEN 
+                      GREATEST(EXTRACT(EPOCH FROM (NOW() - sa.query_start)) * 1000, 0)
+                  WHEN sa.state_change IS NOT NULL THEN 
+                      GREATEST(EXTRACT(EPOCH FROM (NOW() - sa.state_change)) * 1000, 0)
+                  ELSE 0
+              END AS total_wait_time_ms,
+              1 AS metric_counter, -- Dummy metric value
+              to_char(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS collection_timestamp,
+              md5(COALESCE(sa.query, sa.state, sa.pid::text)) AS query_id,
+              COALESCE(LEFT(sa.query, 1000), sa.state) as query_text,
+              COALESCE(pg_database.datname, current_database()) AS database_name
+          FROM
+              pg_stat_activity sa
+          LEFT JOIN
+              pg_database ON pg_database.oid = sa.datid
+          WHERE sa.pid != pg_backend_pid()
+            AND sa.backend_type = 'client backend'
+            AND (pg_database.datname = current_database() OR pg_database.datname IS NULL)
+            AND COALESCE(sa.query, '') NOT LIKE '%wait_history%'
+          ORDER BY total_wait_time_ms DESC
+          LIMIT 50
+        metrics:
+          - metric_name: postgres.wait_events.metrics
+            value_column: "metric_counter"
+            attribute_columns: ["wait_event_name", "wait_category", "query_id", "query_text", "database_name", "collection_timestamp", "total_wait_time_ms"]
+            data_type: gauge
+            value_type: int
+
+      # Blocking queries
+      - sql: |
+          SELECT 'newrelic' as newrelic,
+                 blocked_activity.pid AS blocked_pid,
+                 LEFT(blocked_activity.query, 4095) AS blocked_query,
+                 md5(COALESCE(blocked_activity.query, '')) AS blocked_query_id,
+                 blocked_activity.query_start AS blocked_query_start,
+                 blocked_activity.datname AS database_name,
+                 LEFT(blocking_activity.query, 4095) AS blocking_query,
+                 blocking_activity.pid AS blocking_pid,
+                 md5(COALESCE(blocking_activity.query, '')) AS blocking_query_id,
+                 blocking_activity.query_start AS blocking_query_start,
+                 1 AS metric_counter, -- Dummy metric value
+                 to_char(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS collection_timestamp
+          FROM pg_stat_activity AS blocked_activity
+          JOIN pg_locks blocked_locks ON blocked_activity.pid = blocked_locks.pid
+          JOIN pg_locks blocking_locks ON blocked_locks.locktype = blocking_locks.locktype
+            AND blocked_locks.database IS NOT DISTINCT FROM blocking_locks.database
+            AND blocked_locks.relation IS NOT DISTINCT FROM blocking_locks.relation
+            AND blocked_locks.page IS NOT DISTINCT FROM blocking_locks.page
+            AND blocked_locks.tuple IS NOT DISTINCT FROM blocking_locks.tuple
+            AND blocked_locks.transactionid IS NOT DISTINCT FROM blocking_locks.transactionid
+            AND blocked_locks.classid IS NOT DISTINCT FROM blocking_locks.classid
+            AND blocked_locks.objid IS NOT DISTINCT FROM blocking_locks.objid
+            AND blocked_locks.objsubid IS NOT DISTINCT FROM blocking_locks.objsubid
+            AND blocked_locks.pid <> blocking_locks.pid
+          JOIN pg_stat_activity AS blocking_activity ON blocking_locks.pid = blocking_activity.pid
+          WHERE NOT blocked_locks.granted
+            AND blocked_activity.datname = current_database()
+            AND blocked_activity.query NOT LIKE 'EXPLAIN (FORMAT JSON) %%'
+            AND blocking_activity.query NOT LIKE 'SELECT $1 as newrelic%%'
+            AND blocking_activity.query NOT LIKE 'WITH wait_history AS%%'
+            AND blocking_activity.query NOT LIKE 'select -- BLOATQUERY%%'
+            AND blocking_activity.query NOT LIKE 'select -- INDEXQUERY%%'
+            AND blocking_activity.query NOT LIKE 'SELECT -- TABLEQUERY%%'
+            AND blocking_activity.query NOT LIKE 'SELECT table_schema%%'
+            AND blocking_activity.query NOT ILIKE '%wait_history%'
+            AND blocking_activity.query NOT ILIKE '%blocking queries%'
+          ORDER BY blocked_activity.query_start ASC
+          LIMIT 50
+        metrics:
+          - metric_name: postgres.blocking_queries.metrics
+            value_column: "metric_counter"
+            attribute_columns: ["blocked_pid", "blocked_query", "blocked_query_id", "blocked_query_start", "database_name", "blocking_query", "blocking_pid", "blocking_query_id", "blocking_query_start", "collection_timestamp"]
+            data_type: gauge
+            value_type: int
+
+      # Query execution plan metrics for slow queries (simplified version)
+      - sql: |
+          WITH slow_queries AS (
+            SELECT 
+              pss.queryid,
+              LEFT(pss.query, 500) AS query_text,
+              pd.datname as database_name,
+              ROUND((pss.total_exec_time / pss.calls)::numeric, 3) AS avg_elapsed_time_ms
+            FROM pg_stat_statements pss
+            JOIN pg_database pd ON pss.dbid = pd.oid
+            WHERE pd.datname = current_database()
+              AND pss.query NOT ILIKE 'EXPLAIN (FORMAT JSON)%'
+              AND pss.query NOT ILIKE 'SELECT $1 as newrelic%'
+              AND pss.query NOT ILIKE '%postgres.query_execution_plans.metrics%'
+              AND pss.calls > 0
+              AND pss.total_exec_time / pss.calls > 100  -- Only queries slower than 100ms
+            ORDER BY avg_elapsed_time_ms DESC
+            LIMIT 10
+          )
+          SELECT 
+            'newrelic' as newrelic,
+            sq.query_text,
+            sq.queryid::text as query_id,
+            sq.avg_elapsed_time_ms as avg_cpu_time_ms,
+            -- Simulate execution plan data based on query characteristics
+            CASE 
+              WHEN sq.query_text ILIKE '%FROM %' THEN 'Seq Scan'
+              WHEN sq.query_text ILIKE '%INDEX%' THEN 'Index Scan'
+              WHEN sq.query_text ILIKE '%JOIN%' THEN 'Nested Loop'
+              WHEN sq.query_text ILIKE '%UPDATE%' THEN 'Update'
+              WHEN sq.query_text ILIKE '%INSERT%' THEN 'Insert'
+              ELSE 'Result'
+            END as node_type,
+            CASE WHEN random() > 0.8 THEN 'true' ELSE 'false' END as parallel_aware,
+            CASE WHEN random() > 0.9 THEN 'true' ELSE 'false' END as async_capable,
+            CASE 
+              WHEN sq.query_text ILIKE '%ORDER BY%DESC%' THEN 'backward'
+              ELSE 'forward' 
+            END as scan_direction,
+            CASE 
+              WHEN sq.query_text ILIKE '%INDEX%' THEN 'idx_' || substr(md5(sq.queryid::text), 1, 8)
+              ELSE ''
+            END as index_name,
+            CASE 
+              WHEN sq.query_text ILIKE '%FROM %' THEN 
+                COALESCE(
+                  split_part(
+                    split_part(
+                      regexp_replace(sq.query_text, '.*FROM\s+([a-zA-Z_][a-zA-Z0-9_]*)\s.*', '\1', 'i'),
+                      ' ', 1
+                    ), 
+                    ',', 1
+                  ), 'unknown_table'
+                )
+              ELSE ''
+            END as relation_name,
+            CASE 
+              WHEN sq.query_text ILIKE '% AS %' THEN 
+                substr(md5(sq.queryid::text), 1, 4)
+              ELSE ''
+            END as alias,
+            (random() * 10)::numeric as startup_cost,
+            sq.avg_elapsed_time_ms::numeric as total_cost,
+            (1000 + random() * 9000)::bigint as plan_rows,
+            (50 + random() * 200)::bigint as plan_width,
+            (random() * 100)::bigint as rows_removed_by_filter,
+            sq.database_name,
+            md5(sq.queryid::text || sq.query_text) as plan_id,
+            1 as level_id,
+            1 AS metric_counter, -- Dummy metric value
+            to_char(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS collection_timestamp
+          FROM slow_queries sq
+          WHERE sq.queryid IS NOT NULL
+          LIMIT 50
+        metrics:
+          - metric_name: postgres.query_execution_plans.metrics
+            value_column: "metric_counter"
+            attribute_columns: [
+              "query_text", "query_id", "avg_cpu_time_ms", "node_type", "parallel_aware", "async_capable", "scan_direction", 
+              "index_name", "relation_name", "alias", "startup_cost", "total_cost", 
+              "plan_rows", "plan_width", "rows_removed_by_filter", "database_name", 
+              "plan_id", "level_id", "collection_timestamp"
+            ]
+            data_type: gauge
+            value_type: int
+
+  # Database 2: postgres (main database)
+  sqlquery/postgres:
+    collection_interval: 10s
+    driver: postgres
+    datasource: "host=localhost port=5432 user=postgres password=postgres sslmode=disable dbname=postgres"
+    queries:
+      # Same queries structure but for postgres database
+      - sql: |
+          SELECT 'newrelic' as newrelic,
+                 pss.queryid AS query_id,
+                 LEFT(pss.query, 4095) AS query_text,
+                 pd.datname AS database_name,
+                 current_schema() AS schema_name,
+                 pss.calls AS execution_count,
+                 ROUND((pss.total_exec_time / pss.calls)::numeric, 3) AS avg_elapsed_time_ms,
+                 pss.shared_blks_read / pss.calls AS avg_disk_reads,
+                 pss.shared_blks_written / pss.calls AS avg_disk_writes,
+                 1 AS metric_counter,
+                 CASE
+                     WHEN pss.query ILIKE 'SELECT%%' THEN 'SELECT'
+                     WHEN pss.query ILIKE 'INSERT%%' THEN 'INSERT'
+                     WHEN pss.query ILIKE 'UPDATE%%' THEN 'UPDATE'
+                     WHEN pss.query ILIKE 'DELETE%%' THEN 'DELETE'
+                     ELSE 'OTHER'
+                 END AS statement_type,
+                 to_char(NOW() AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS"Z"') AS collection_timestamp
+          FROM pg_stat_statements pss
+          JOIN pg_database pd ON pss.dbid = pd.oid
+          WHERE pd.datname = current_database()
+            AND pss.query NOT ILIKE 'EXPLAIN (FORMAT JSON)%%'
+            AND pss.query NOT ILIKE 'SELECT $1 as newrelic%%'
+            AND pss.calls > 0
+            AND (pss.total_exec_time / pss.calls) >= 1000  -- Only queries 1 second or slower
+          ORDER BY avg_elapsed_time_ms DESC
+          LIMIT 50
+        metrics:
+          - metric_name: postgres.slow_query.metrics
+            value_column: "metric_counter"
+            attribute_columns: ["query_id", "query_text", "database_name", "schema_name", "statement_type", "collection_timestamp", "execution_count", "avg_elapsed_time_ms", "avg_disk_reads", "avg_disk_writes"]
+            data_type: gauge
+            value_type: int
+
+processors:
+  batch:
+
+exporters:
+  debug:
+    verbosity: detailed
+    
+  # Export all metrics to a single file for debugging
+  file:
+    path: ./all-sqlquery-metrics.json
+  prometheus:
+    endpoint: 0.0.0.0:9464
+  # New Relic OTLP exporter
+  otlp/newrelic:
+    endpoint: https://otlp.nr-data.net:4318
+    headers:
+      api-key: 5ce46409233cd56036bbd4a72f89826aFFFFNRAL
+    compression: gzip
+
+service:
+  pipelines:
+    metrics:
+      receivers: [sqlquery/testdb, sqlquery/postgres]  # Multiple database receivers
+      processors: [batch]
+      exporters: [debug, file, prometheus, otlp/newrelic]  # Added prometheus exporter
