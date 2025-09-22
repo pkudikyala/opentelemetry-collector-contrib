@@ -75,7 +75,7 @@ exporters:
   otlp/newrelic:
     endpoint: https://staging-otlp.nr-data.net:4318
     headers:
-      api-key: 70ec4a667dcec4070c9c881064645d30FFFFNRAL
+      api-key: api-key
     compression: gzip
 service:
   telemetry:
